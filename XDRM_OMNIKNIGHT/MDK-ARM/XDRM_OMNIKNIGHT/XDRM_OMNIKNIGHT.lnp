@@ -1,4 +1,4 @@
---cpu Cortex-M4.fp
+--cpu=Cortex-M4.fp
 "xdrm_omniknight\main.o"
 "xdrm_omniknight\statusmachine.o"
 "xdrm_omniknight\stm32f4xx_it.o"
@@ -11,6 +11,7 @@
 "xdrm_omniknight\bsp_data.o"
 "xdrm_omniknight\driverlib_filter.o"
 "xdrm_omniknight\canbustask.o"
+"xdrm_omniknight\data_judge.o"
 "xdrm_omniknight\stm32f4xx_hal_msp.o"
 "xdrm_omniknight\driver_beltraise.o"
 "xdrm_omniknight\beeptask.o"
@@ -31,6 +32,7 @@
 "xdrm_omniknight\bsp_tim.o"
 "xdrm_omniknight\bsp_usart.o"
 "xdrm_omniknight\stm32f4xx_hal_timebase_tim.o"
+"xdrm_omniknight\bsp_nvic.o"
 "xdrm_omniknight\system_stm32f4xx.o"
 "xdrm_omniknight\stm32f4xx_hal_adc.o"
 "xdrm_omniknight\stm32f4xx_hal_adc_ex.o"

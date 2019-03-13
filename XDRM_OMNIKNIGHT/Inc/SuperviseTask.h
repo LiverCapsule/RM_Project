@@ -80,7 +80,6 @@ uint8_t Is_Lost_Error_Set(uint32_t err_code);
 uint8_t Is_Serious_Error(void);
 void ThreadMonitor(ThreadMonitor_t* obj,uint8_t Mode);
 void Monitor_ThreadCreate(osPriority taskPriority);
-void Superviese_Task(void const * argument);
 
 #endif
 

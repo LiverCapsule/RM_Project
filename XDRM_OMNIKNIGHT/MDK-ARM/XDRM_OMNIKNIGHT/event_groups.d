@@ -1,8 +1,8 @@
 xdrm_omniknight\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/event_groups.c
-xdrm_omniknight\event_groups.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+xdrm_omniknight\event_groups.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdlib.h
 xdrm_omniknight\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-xdrm_omniknight\event_groups.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-xdrm_omniknight\event_groups.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+xdrm_omniknight\event_groups.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stddef.h
+xdrm_omniknight\event_groups.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdint.h
 xdrm_omniknight\event_groups.o: ../Inc/FreeRTOSConfig.h
 xdrm_omniknight\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 xdrm_omniknight\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

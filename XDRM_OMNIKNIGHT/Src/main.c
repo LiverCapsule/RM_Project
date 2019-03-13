@@ -51,7 +51,6 @@
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
 
-
 /* USER CODE BEGIN Includes */
 
 
@@ -59,6 +58,8 @@
 
 #include "Driver_GuideWheel.h"
 #include "BSP.h"
+
+
 
 
 
@@ -81,7 +82,7 @@ void MX_FREERTOS_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-	int8_t g1 = 0;
+int8_t g1 = 0;
 	int8_t h1 = 0;
 	int8_t i1 = 0;
 	int8_t j1 = 0;

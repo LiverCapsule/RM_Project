@@ -3,6 +3,8 @@
 #include "Driver_Remote.h"
 
 
+
+
 #include "DriverLib_PID.h"
 
 
@@ -14,6 +16,9 @@ void ARM_Get_PID(void)
 	AMRotatePID.kp =60;
 	AMRotatePID.ki =0;
 	AMRotatePID.kd =0;
+
+	
+	
 
 }
 uint8_t AM_Stall_Flag = 0;

@@ -51,7 +51,7 @@ uint8_t Is_Lost_Error_Set(uint32_t index)
 	else							return 0;
 }
 
-/****
+/*
 uint8_t Is_Serious_Error()
 {
 	#if (XDRM_CONVERTER == 0)
@@ -62,8 +62,7 @@ uint8_t Is_Serious_Error()
 
 	#endif
 }
-不知道2019年的工程会不会用到，所以先注释掉
-****/
+不知道2019年的工程会不会用到，所以先注释掉*/
 
 /**
   * @brief  用于监控线程的占用情况
@@ -72,7 +71,7 @@ uint8_t Is_Serious_Error()
   */
 void ThreadMonitor(ThreadMonitor_t* obj,uint8_t Mode)
 {
-	uint32_t currentTime = xTaskGetTickCount();//18年步兵用的是自己写的Get_Time_Micros()
+	uint32_t currentTime = xTaskGetTickCount();//18年步兵用的是自己写的Get_Time_Micros()，我暂时还不知道区别
 	if(Mode == THREAD_IN)
 	{
 		obj->deltaTime = xTaskGetTickCount() - obj->previousTime;	//距离距离上次运行的时间

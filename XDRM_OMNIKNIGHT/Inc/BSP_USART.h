@@ -83,7 +83,7 @@ extern uint8_t UART2_RXBUFF[UART2_RXBUFF_SIZE];
 #define UART1_RXBUFF_SIZE 100
 extern uint8_t UART1_RXBUFF[UART1_RXBUFF_SIZE];
 
-#define UART6_RXBUFF_SIZE 100////×??à128??×?????????????
+#define UART6_RXBUFF_SIZE 100////最多128个字节，交互数据
 extern uint8_t UART6_RXBUFF[UART6_RXBUFF_SIZE];
 
 /* USER CODE END Prototypes */

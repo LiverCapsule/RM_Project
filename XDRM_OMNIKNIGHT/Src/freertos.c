@@ -55,8 +55,6 @@
 #include "cmsis_os.h"
 #include "CanBusTask.h"
 #include "ControlTask.h"
-#include "StatusMachine.h"
-#include "SuperviseTask.h"
 //#include "StatusMachine.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -128,9 +126,10 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-  osMutexDef(myMutex01);
+   osMutexDef(myMutex01);
   myMutex01Handle = osMutexCreate(osMutex(myMutex01));
- /* Create the recursive mutex(es) */
+
+  /* Create the recursive mutex(es) */
   /* definition and creation of myRecursiveMutex01 */
   osMutexDef(myRecursiveMutex01);
   myRecursiveMutex01Handle = osRecursiveMutexCreate(osMutex(myRecursiveMutex01));
@@ -175,11 +174,10 @@ void MX_FREERTOS_Init(void) {
   Task_ControlHandle = osThreadCreate(osThread(Drivers_Control), NULL);
 
 
-  osThreadDef(Status_Update, StatusMachine, osPriorityRealtime, 0, 256);
-  Status_UpdateHandle = osThreadCreate(osThread(Status_Update), NULL);//状态机直接写在这里会出现很多重定义的问题，所以先注释掉
+//  osThreadDef(Status_Update, StatusMachine, osPriorityRealtime, 0, 256);
+//  Task_ControlHandle = osThreadCreate(osThread(Status_Update), NULL);状态机直接写在这里会出现很多重定义的问题，所以先注释掉
 	
-	osThreadDef(Superviese, Superviese_Task, osPriorityRealtime, 0, 256);
-	Superviese_TaskHandle = osThreadCreate(osThread(Superviese),NULL);
+	//osThreadDef(Superviese, Superviese_Task, osPriorityRealtime, 0, 256);
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */

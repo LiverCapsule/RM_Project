@@ -171,7 +171,7 @@ void Data_Unpack_Judge(void)
 
 
 
-void Info_Rc_Judge(void)//这里还要再改
+void Info_Rc_Judge(void)//先这样，还要再改
 {
 	//数据多于缓冲区阈值
 	while(bufferlen(&Que_JudgeFrame) > 60)
@@ -187,17 +187,11 @@ void Info_Rc_Judge(void)//这里还要再改
                 buffer_multiPop(&Que_JudgeFrame, &frame_temp[5], data_len + CMD_LEN + CRC_LEN);
                 if (Verify_CRC16_Check_Sum(frame_temp, data_len + HEADER_LEN + CMD_LEN + CRC_LEN) == 1)
                 {
-					JudgeReadValue(frame_temp);
+//					Data_Unpack_Judge(frame_temp);
 				}
 			}
 		}
 	}
-	
-	
-	
-	
-
-
 }
 
 uint8_t InterInfo[120];
@@ -225,17 +219,17 @@ void Info_Sd_Judge(void)//裁判系统发送的数据就是交互的数据，即一是与客户端交互一
 	InterData_Judge[11]= 0x02;//红色工程的客户端id，裁判系统只允许把数据发回自己对应的客户端
 	InterData_Judge[12]= 0x01;
 	
-//	InterInfo[]
-	
-	memcpy(&InterData_Judge[13],InterInfo,InfoLength);//感觉以前的处理方法很好
-	
-	
-	
-	
-	
-	Append_CRC16_Check_Sum(InterData_Judge,InfoLength+13+1 );//总共的数据有多少就是多少
+//	InterInfo[0] = //发送先写到这里
+// InterInfo[100] = ;	
+//	memcpy(&InterData_Judge[13],InterInfo,InfoLength);//感觉以前的处理方法很好
+//	
+//	
+//	
+//	
+//	
+//	Append_CRC16_Check_Sum(InterData_Judge,InfoLength+13+1 );//总共的数据有多少就是多少
 
-	HAL_UART_Transmit_DMA(&huart6,InterData_Judge, InfoLength+13+1 );//22字节
+//	HAL_UART_Transmit_DMA(&huart6,InterData_Judge, InfoLength+13+1 );//22字节
 
 
 

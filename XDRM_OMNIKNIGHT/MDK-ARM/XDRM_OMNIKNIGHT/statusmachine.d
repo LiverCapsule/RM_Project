@@ -3,8 +3,8 @@ xdrm_omniknight\statusmachine.o: ../Inc/StatusMachine.h
 xdrm_omniknight\statusmachine.o: ../Inc/Driver_Beltraise.h
 xdrm_omniknight\statusmachine.o: ../Inc/config.h
 xdrm_omniknight\statusmachine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-xdrm_omniknight\statusmachine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-xdrm_omniknight\statusmachine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+xdrm_omniknight\statusmachine.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stddef.h
+xdrm_omniknight\statusmachine.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdint.h
 xdrm_omniknight\statusmachine.o: ../Inc/FreeRTOSConfig.h
 xdrm_omniknight\statusmachine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 xdrm_omniknight\statusmachine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
@@ -33,7 +33,7 @@ xdrm_omniknight\statusmachine.o: ../Drivers/CMSIS/Include/core_cmFunc.h
 xdrm_omniknight\statusmachine.o: ../Drivers/CMSIS/Include/core_cmSimd.h
 xdrm_omniknight\statusmachine.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
 xdrm_omniknight\statusmachine.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-xdrm_omniknight\statusmachine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+xdrm_omniknight\statusmachine.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdio.h
 xdrm_omniknight\statusmachine.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
 xdrm_omniknight\statusmachine.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h
 xdrm_omniknight\statusmachine.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h
@@ -57,9 +57,9 @@ xdrm_omniknight\statusmachine.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_h
 xdrm_omniknight\statusmachine.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 xdrm_omniknight\statusmachine.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 xdrm_omniknight\statusmachine.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-xdrm_omniknight\statusmachine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
-xdrm_omniknight\statusmachine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
-xdrm_omniknight\statusmachine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+xdrm_omniknight\statusmachine.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\math.h
+xdrm_omniknight\statusmachine.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\string.h
+xdrm_omniknight\statusmachine.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdlib.h
 xdrm_omniknight\statusmachine.o: ../Inc/Driver_Chassis.h
 xdrm_omniknight\statusmachine.o: ../Inc/Driver_GuideWheel.h
 xdrm_omniknight\statusmachine.o: ../Inc/Driver_Manipulator.h

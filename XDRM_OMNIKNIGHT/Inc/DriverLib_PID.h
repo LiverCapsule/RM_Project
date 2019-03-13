@@ -137,7 +137,6 @@ enum
 	&PID_Calc,\
 	&PID_Reset,\
 }
-
 #define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \
 {\
 	0,\

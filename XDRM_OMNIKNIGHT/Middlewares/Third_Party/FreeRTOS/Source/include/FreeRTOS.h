@@ -237,11 +237,11 @@ extern "C" {
 #endif
 
 #ifndef configUSE_RECURSIVE_MUTEXES
-	#define configUSE_RECURSIVE_MUTEXES 0//不使用递归互斥量
+	#define configUSE_RECURSIVE_MUTEXES 1//不使用递归互斥量
 #endif
 
 #ifndef configUSE_MUTEXES
-	#define configUSE_MUTEXES 0//忽略互斥量
+	#define configUSE_MUTEXES 1//忽略互斥量
 #endif
 
 #ifndef configUSE_TIMERS
@@ -249,7 +249,7 @@ extern "C" {
 #endif
 
 #ifndef configUSE_COUNTING_SEMAPHORES
-	#define configUSE_COUNTING_SEMAPHORES 0//不使用计数信号量
+	#define configUSE_COUNTING_SEMAPHORES 1//1使用计数信号量
 #endif
 
 #ifndef configUSE_ALTERNATIVE_API

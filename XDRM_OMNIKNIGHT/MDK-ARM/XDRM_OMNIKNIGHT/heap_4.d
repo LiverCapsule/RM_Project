@@ -1,8 +1,8 @@
 xdrm_omniknight\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c
-xdrm_omniknight\heap_4.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+xdrm_omniknight\heap_4.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdlib.h
 xdrm_omniknight\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-xdrm_omniknight\heap_4.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-xdrm_omniknight\heap_4.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+xdrm_omniknight\heap_4.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stddef.h
+xdrm_omniknight\heap_4.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdint.h
 xdrm_omniknight\heap_4.o: ../Inc/FreeRTOSConfig.h
 xdrm_omniknight\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 xdrm_omniknight\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

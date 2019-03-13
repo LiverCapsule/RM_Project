@@ -165,27 +165,7 @@ void PID_Calc(PID_Regulator_t *pid)
 	else
 	{//试试看阶梯式积分
 		
-			
-		if(EC > EC_Max)
-		{
-			EC_Max = EC;
-		}
-		if(E > E_Max)
-		{
-			E_Max = E;
-		}
-		
-				
-		if(EC < EC_Min)
-		{
-			EC_Min = EC;
-		}
-		if(E < E_Min)
-		{
-			E_Min = E;
-		}
-		
-		
+
 		if(pid->err[1] > pid->ref/10)//感觉极其有道理
 		{
 			pid->err[0] = 0;
