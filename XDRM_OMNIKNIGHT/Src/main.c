@@ -53,15 +53,10 @@
 
 /* USER CODE BEGIN Includes */
 
-
 #include "config.h"
 
 #include "Driver_GuideWheel.h"
 #include "BSP.h"
-
-
-
-
 
 /* USER CODE END Includes */
 

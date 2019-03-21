@@ -223,7 +223,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     }
 
     __HAL_LINKDMA(uartHandle,hdmarx,hdma_usart2_rx);
-		else if(huart->Instance==USART6)
+	}
+		else if(uartHandle->Instance==USART6)
 		{
 		/* USER CODE BEGIN USART6_MspInit 0 */
 
@@ -262,7 +263,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
 				_Error_Handler(__FILE__, __LINE__);
 			}
 
-			__HAL_LINKDMA(huart,hdmarx,hdma_usart6_rx);
+			__HAL_LINKDMA(uartHandle,hdmarx,hdma_usart6_rx);
 		
 		/* USART6 DMA Init */
 			/* USART6_TX Init */
@@ -281,7 +282,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
 				_Error_Handler(__FILE__, __LINE__);
 			}
 
-			__HAL_LINKDMA(huart,hdmatx,hdma_usart6_tx);
+			__HAL_LINKDMA(uartHandle,hdmatx,hdma_usart6_tx);
 
 		/* USER CODE BEGIN USART6_MspInit 1 */
 
@@ -291,7 +292,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
   /* USER CODE BEGIN USART2_MspInit 1 */
 
   /* USER CODE END USART2_MspInit 1 */
-  }
+  
 }
 
 void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)

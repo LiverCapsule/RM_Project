@@ -1,4 +1,4 @@
---cpu=Cortex-M4.fp
+--cpu Cortex-M4.fp
 "xdrm_omniknight\main.o"
 "xdrm_omniknight\statusmachine.o"
 "xdrm_omniknight\stm32f4xx_it.o"
@@ -30,9 +30,9 @@
 "xdrm_omniknight\bsp_i2c.o"
 "xdrm_omniknight\bsp_spi.o"
 "xdrm_omniknight\bsp_tim.o"
+"xdrm_omniknight\bsp_nvic.o"
 "xdrm_omniknight\bsp_usart.o"
 "xdrm_omniknight\stm32f4xx_hal_timebase_tim.o"
-"xdrm_omniknight\bsp_nvic.o"
 "xdrm_omniknight\system_stm32f4xx.o"
 "xdrm_omniknight\stm32f4xx_hal_adc.o"
 "xdrm_omniknight\stm32f4xx_hal_adc_ex.o"

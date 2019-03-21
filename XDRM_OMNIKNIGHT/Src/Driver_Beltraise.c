@@ -1,5 +1,5 @@
 #include "Driver_Beltraise.h"
-
+#include "StatusMachine.h"
 #include "DriverLib_PID.h"
 #include "CanBusTask.h"
 #include "Driver_Remote.h"
@@ -9,6 +9,88 @@ int16_t BeltMotorSpeedRef[2] = {0,0};
 
 BeltModeTypeDef BeltMode;
 int bmkp = 60;
+extern uint8_t S_switch;
+uint16_t raise_speed = 300;
+extern uint8_t Foward_G_flag;
+uint8_t steps = 0;
+uint8_t steps_down = 0;
+uint8_t BM_AngelGet = 0;
+extern uint8_t Foward_C_flag;
+extern uint8_t Back_C_flag;
+extern uint8_t Back_GW_flag;
+extern uint32_t tick_c_1;
+
+void Belt_Move_Up(void)
+{
+	static int32_t LBM_Angle = 0;
+	static int32_t RBM_Angle = 0;
+			
+	BeltMotorSpeedRef[0] = -raise_speed;//250
+	BeltMotorSpeedRef[1] = raise_speed;
+	if(BM_AngelGet == 1)
+	{
+		LBM_Angle = LBeltM_Measure.ecd_angle;
+		RBM_Angle = RBeltM_Measure.ecd_angle;
+		BM_AngelGet = 0;
+	}
+	if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+	{
+		BeltMotorSpeedRef[0] = 0;
+		BeltMotorSpeedRef[1] = 0;
+		if(UpIslandState == Up_Island_BeltUp_First) 
+		{
+			UpIslandState = Up_Island_ChassisAdvance_First;
+		}
+		else if(UpIslandState == Up_Island_BeltUp_Twice) 
+		{
+			UpIslandState = Up_Island_Stop;
+		}
+		else if(DownIslandState == Down_Island_BeltUp_First)
+		{
+			DownIslandState = Down_Island_ChassisBack_Twice;
+		}
+		else if(DownIslandState == Down_Island_BeltUp_Twice)
+		{
+			DownIslandState = Down_Island_stop; 
+		}
+	}
+}
+
+void Belt_Move_Down(void)
+{
+	static int32_t LBM_Angle = 0;
+	static int32_t RBM_Angle = 0;
+	BeltMotorSpeedRef[0] = raise_speed;//250
+	BeltMotorSpeedRef[1] = -raise_speed;
+	if(BM_AngelGet == 1)
+	{
+		LBM_Angle = LBeltM_Measure.ecd_angle;
+		RBM_Angle = RBeltM_Measure.ecd_angle;
+		BM_AngelGet = 0;
+	}
+	if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+	{
+		BeltMotorSpeedRef[0] = 100;
+		BeltMotorSpeedRef[1] = -100;
+		if (UpIslandState == Up_Island_BeltDown_First) 
+		{
+			UpIslandState = Up_Island_GuideWheelAdvance_First;
+		}
+		else if(UpIslandState == Up_Island_BeltDown_Twice)
+		{
+			UpIslandState = Up_Island_GuideWheelAdvance_Twice;
+		}
+		else if(DownIslandState == Down_Island_BeltDown_First)
+		{
+			DownIslandState = Down_Island_GuideWheelBack_First;
+		}
+		else if(DownIslandState == Down_Island_BeltDown_Twice)
+		{
+			DownIslandState = Down_Island_GuideWheelBack_Twice;
+		}
+		
+	}
+}
 
 //现在要想一下整个工程大概怎么写了。
 void BM_Get_PID(void)
@@ -26,8 +108,6 @@ void BM_Get_PID(void)
 }
 
 
-
-
 void 	BM_Calc_Output(void)
 {
 	PID_Task(&LBMSpeedPID,BeltMotorSpeedRef[0],LBeltM_Measure.speed_rpm/10.0);//float /10.0
@@ -39,16 +119,6 @@ void 	BM_Calc_Output(void)
 
 }
 //还要改！
-extern uint8_t S_switch;
-uint16_t raise_speed = 300;
-extern uint8_t Foward_G_flag;
-uint8_t steps = 0;
-uint8_t steps_down = 0;
-uint8_t BM_AngelGet = 0;
-extern uint8_t Foward_C_flag;
-extern uint8_t Back_C_flag;
-extern uint8_t Back_GW_flag;
-extern uint32_t tick_c_1;
 void BM_Get_SpeedRef(void)
 {	
 	if(RC_CtrlData.rc.s2 == 3)//只有在拨杆2为中间值时才能通过拨杆1抬升,拨杆1为3时遥控器控制抬升，1时上岛过程，2时下岛
@@ -246,44 +316,14 @@ void BM_Get_SpeedRef_SM(void)
 	
 		//case Normal_Key_BeltMove{}以后再写
 
-		case Auto_Up_Island_BeltMove:
+		case Belt_Up:
 		{
-			static int32_t LBM_Angle = 0;
-			static int32_t RBM_Angle = 0;
-			BeltMotorSpeedRef[0] = -raise_speed;//250
-			BeltMotorSpeedRef[1] = raise_speed;
-			if(BM_AngelGet == 1)
-			{
-				LBM_Angle = LBeltM_Measure.ecd_angle;
-				RBM_Angle = RBeltM_Measure.ecd_angle;
-				BM_AngelGet = 0;
-			}
-			if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
-			{
-				BeltMotorSpeedRef[0] = 0;
-				BeltMotorSpeedRef[1] = 0;
-				Back_C_flag = 1;
-			}
+			Belt_Move_Up();
 		}break;
 
-		case Auto_Down_Island_BeltMove:
+		case Belt_Down:
 		{
-			static int32_t LBM_Angle = 0;
-			static int32_t RBM_Angle = 0;
-			BeltMotorSpeedRef[0] = raise_speed;//250
-			BeltMotorSpeedRef[1] = -raise_speed;
-			if(BM_AngelGet == 1)
-			{
-				LBM_Angle = LBeltM_Measure.ecd_angle;
-				RBM_Angle = RBeltM_Measure.ecd_angle;
-				BM_AngelGet = 0;
-			}
-			if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
-			{
-				BeltMotorSpeedRef[0] = 100;
-				BeltMotorSpeedRef[1] = -100;
-				Back_GW_flag = 1;
-			}
+			Belt_Move_Down();
 		}break;
 
 		case BeltMove_Stop:
@@ -322,7 +362,7 @@ void BM_Set_Current(void)
 void Belt_Control(void)
 {
 	BM_Get_PID();
-	BM_Get_SpeedRef();
+	BM_Get_SpeedRef_SM();
 	BM_Calc_Output();
 	BM_Set_Current();
 
