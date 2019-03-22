@@ -27,8 +27,10 @@ typedef enum
     Normal_Rc_ChassisMove = 0,
     Normal_Key_ChassisMove,
     ChassisMove_Stop,
+		Chassis_Advance,
+		Chassis_Back,
     Auto_Up_Island_ChassisMove,
-    Auto_Down_Island_ChassisMove,
+    Auto_Down_Island_ChassisMove
 }ChassisModeTypeDef;
 
 
@@ -42,6 +44,7 @@ void CM_Get_PID(void);
 
 
 extern ChassisDataTypeDef ChassisData;
+extern ChassisModeTypeDef ChassisMode;
 
 
 

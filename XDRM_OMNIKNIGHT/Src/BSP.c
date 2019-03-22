@@ -10,6 +10,7 @@
 #include "BSP_TIM.h"
 #include "BSP_USART.h"
 #include "BSP_GPIO.h"
+#include "BSP_NVIC.h"
 
 void BSP_Init(void)
 {
@@ -21,8 +22,8 @@ void BSP_Init(void)
 	MX_TIM4_Init();
 	MX_TIM3_Init();
 	MX_USART1_UART_Init();
-	
 	MX_USART6_UART_Init();
+	MX_NVIC_Init();
 	
 	
 }

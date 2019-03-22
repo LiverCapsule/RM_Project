@@ -1,7 +1,7 @@
 xdrm_omniknight\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/croutine.c
 xdrm_omniknight\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-xdrm_omniknight\croutine.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stddef.h
-xdrm_omniknight\croutine.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdint.h
+xdrm_omniknight\croutine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+xdrm_omniknight\croutine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 xdrm_omniknight\croutine.o: ../Inc/FreeRTOSConfig.h
 xdrm_omniknight\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 xdrm_omniknight\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
