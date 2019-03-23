@@ -249,10 +249,15 @@ HAL_StatusTypeDef HAL_CAN_Init(CAN_HandleTypeDef *hcan)
     HAL_CAN_MspInit(hcan);//运行到这一句sleep打勾
   }
 
-  /* Exit from sleep mode */
-  CLEAR_BIT(hcan->Instance->MCR, CAN_MCR_SLEEP);//发现是这里刚清楚了
+  /* Exit from sleep mode */											//之前以为是库的问题，最后改了cube自动生成的can复用的gpio引脚，就可以了
+  CLEAR_BIT(hcan->Instance->MCR, CAN_MCR_SLEEP);//是这一句的问题，不知道为什么这里之后MCR的SLEEP位到底为什么不清零
+  /*加上去的*/  /* Request initialisation */
+//	hcan->Instance->MCR |= CAN_MCR_INRQ;//不加这句的话MSR寄存器的SLAK位置1，旧库不检测SLAK
+																			//本来的话MCR_SLEEP 对应MSR的SLAK
+//    hcan->Instance->MCR &= (~(uint32_t)CAN_MCR_SLEEP);
 
-  /* Get tick */
+	
+	/* Get tick */											
   tickstart = HAL_GetTick();
 
   /* Check Sleep mode leave acknowledge */
@@ -277,7 +282,7 @@ HAL_StatusTypeDef HAL_CAN_Init(CAN_HandleTypeDef *hcan)
   tickstart = HAL_GetTick();
 
   /* Wait initialisation acknowledge */
-  while ((hcan->Instance->MSR & CAN_MSR_INAK) == RESET)
+  while ((hcan->Instance->MSR & CAN_MSR_INAK) == RESET)//软件将INQR位清零后，等待硬件将INAK位清零，确认切换到正常模式
   {
     if ((HAL_GetTick() - tickstart) > CAN_TIMEOUT_VALUE)
     {

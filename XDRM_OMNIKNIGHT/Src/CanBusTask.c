@@ -209,7 +209,15 @@ void Can_Send(void)
 {		
 
 
-
+		CAN2_ReallySend.tx_header.StdId = 0x200;
+		CAN2_ReallySend.msg.data[0] = 0x01;
+		CAN2_ReallySend.msg.data[1] = 0x11;
+		CAN2_ReallySend.msg.data[2] = 0x01;
+		CAN2_ReallySend.msg.data[3] = 0x11;
+		CAN2_ReallySend.msg.data[4] = 0x01;
+		CAN2_ReallySend.msg.data[5] = 0x11;
+		CAN2_ReallySend.msg.data[6] = 0x01;
+		CAN2_ReallySend.msg.data[7] = 0x01;
 
 	uint16_t testlen = CAN_bufferlen(&Que_CAN1_Tx);
 //如果都在一个线程里发的话等发的数据多了就会不够用了
@@ -217,14 +225,18 @@ void Can_Send(void)
 //时间触发模式好像可以，但是没必要而且数据就少了
 		CAN_bufferPop(&Que_CAN1_Tx,&CAN1_ReallySend);
 
-		HAL_CAN_AddTxMessage(&hcan1,&CAN1_ReallySend.tx_header,CAN1_ReallySend.msg.data,(uint32_t*)CAN_TX_MAILBOX0);//若0邮箱满了，就自动加到下一个
-		
+//		HAL_CAN_AddTxMessage(&hcan1,&CAN1_ReallySend.tx_header,CAN1_ReallySend.msg.data,(uint32_t*)CAN_TX_MAILBOX0);//若0邮箱满了，就自动加到下一个
+		HAL_CAN_AddTxMessage(&hcan2,&CAN2_ReallySend.tx_header,CAN2_ReallySend.msg.data,(uint32_t*)CAN_TX_MAILBOX0);//若0邮箱满了，就自动加到下一个
+
+
+	
+	
 		CAN_Send_FrameCounter++;
 
 
 		
 		
-	TxMailFreeNum = HAL_CAN_GetTxMailboxesFreeLevel(&hcan1);
+	TxMailFreeNum = HAL_CAN_GetTxMailboxesFreeLevel(&hcan2);
 
 }
 

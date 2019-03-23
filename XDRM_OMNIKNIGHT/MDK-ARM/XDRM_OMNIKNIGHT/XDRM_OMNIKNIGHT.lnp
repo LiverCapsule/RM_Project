@@ -1,4 +1,4 @@
---cpu Cortex-M4.fp
+--cpu=Cortex-M4.fp
 "xdrm_omniknight\main.o"
 "xdrm_omniknight\statusmachine.o"
 "xdrm_omniknight\stm32f4xx_it.o"
@@ -10,6 +10,7 @@
 "xdrm_omniknight\driverlib_ramp.o"
 "xdrm_omniknight\bsp_data.o"
 "xdrm_omniknight\driverlib_filter.o"
+"xdrm_omniknight\driverlib_func.o"
 "xdrm_omniknight\canbustask.o"
 "xdrm_omniknight\data_judge.o"
 "xdrm_omniknight\stm32f4xx_hal_msp.o"

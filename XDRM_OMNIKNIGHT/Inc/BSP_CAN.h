@@ -69,7 +69,7 @@ extern CAN_HandleTypeDef hcan1;
 extern void _Error_Handler(char *, int);
 
 void MX_CAN1_Init(void);
-
+void MX_CAN2_Init(void);
 /* USER CODE BEGIN Prototypes */
 
 
@@ -102,9 +102,11 @@ typedef struct CAN_circle_buffer{
 
 
 extern CanRxMsgTypeDef CAN1_Receive;
-	
+extern CanRxMsgTypeDef CAN2_Receive;
+extern CanTxMsgTypeDef CAN2_ReadyToSend;
+extern CAN_HandleTypeDef hcan2;
 
-
+extern CanTxMsgTypeDef CAN2_ReallySend;
 extern CanTxMsgTypeDef CAN1_ReadyToSend;
 extern CanTxMsgTypeDef CAN1_ReallySend;
 /* USER CODE END Prototypes */

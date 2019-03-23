@@ -64,6 +64,17 @@ CanTxMsgTypeDef CAN1_ReallySend;
 
 
 
+CanRxMsgTypeDef CAN2_Receive;
+	
+CanTxMsgTypeDef CAN2_ReadyToSend;
+CanTxMsgTypeDef CAN2_ReallySend;
+
+CAN_FilterTypeDef CAN2_Filter;
+
+
+/* USER CODE END 0 */
+
+CAN_HandleTypeDef hcan2;
 CAN_FilterTypeDef CAN1_Filter;
 /* USER CODE END 0 */
 
@@ -119,8 +130,64 @@ void MX_CAN1_Init(void)//±¾À´Ò»Ö±Ò²ÊÇ³õÊ¼»¯ÓÐÎÊÌâ£¬Ö®ºóÉÕÁËÒ»ÏÂÖ®Ç°´úÂëÓÖ¿ÉÒÔÁË¡
   HAL_CAN_ActivateNotification(&hcan1,CAN_IT_RX_FIFO0_MSG_PENDING);	//ojbkÁË// ¸Ð¾õ²»ÊÇ£¬ÊÇÓÐ¹ÒÆðÖÐ¶Ï£¬µ«ÎÞ¹ÒÆðclear,ÊÇÒòÎªFMP²»ÔÚ±»ÈÏÎªÊÇÒ»¸öflagÎ»£¬ÊÇÒ»¸ö¼ÆÊýµÄ£¬Ó²¼þ×Ô¶¯¼Ó¼õ   //Ê×ÏÈcanµÄ¹ÒÆðÊÇÏà¶ÔÓÚ½ÓÊÕÓÊÏäµÄ
 	HAL_CAN_ActivateNotification(&hcan1,CAN_IT_TX_MAILBOX_EMPTY);
 	
-				
 }
+
+
+
+
+
+
+/* CAN2 init function */
+void MX_CAN2_Init(void)//1ÊÇcan2Ð¾Æ¬£¬2ÊÇÁ¬can1µÄÇé¿öÏÂcan2£¬ÊÇ²»ÊÇÒòÎªcan1Ã»ÐÑ
+{
+  hcan2.Instance = CAN2;
+  hcan2.Init.Prescaler = 3;
+  hcan2.Init.Mode = CAN_MODE_NORMAL;
+  hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
+  hcan2.Init.TimeSeg1 = CAN_BS1_7TQ;
+  hcan2.Init.TimeSeg2 = CAN_BS2_6TQ;
+  hcan2.Init.TimeTriggeredMode = DISABLE;
+  hcan2.Init.AutoBusOff = ENABLE;
+  hcan2.Init.AutoWakeUp = DISABLE;
+  hcan2.Init.AutoRetransmission = ENABLE;
+  hcan2.Init.ReceiveFifoLocked = DISABLE;
+  hcan2.Init.TransmitFifoPriority = DISABLE;
+  if (HAL_CAN_Init(&hcan2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+	
+	HAL_CAN_Start(&hcan2);
+//	CAN2_Filter.SlaveStartFilterBank = 14;//¶ÔÓ¦µÄÊÇ¾É¿âµÄBankNumber,Ò»¸öcan¾Í²»ÓÃ¹Ü
+//	CAN2_Filter.FilterActivation = ENABLE;
+//	CAN2_Filter.FilterBank = 14;
+//	CAN2_Filter.FilterFIFOAssignment = CAN_FilterFIFO0;
+//	CAN2_Filter.FilterIdHigh = 0;
+//	CAN2_Filter.FilterIdLow = 0;
+//	CAN2_Filter.FilterMode = CAN_FILTERMODE_IDMASK;//±êÊ¶·ûÑÚÂë£¬32Î»ÑÚÂë32Î»±êÊ¶·û//ÁíÒ»ÖÖÄ£Ê½¾Í¿ÉÒÔÊÇÁ½¸ö32Î»±êÊ¶·û¡£
+//	CAN2_Filter.FilterMaskIdHigh = 0;
+//	CAN2_Filter.FilterMaskIdLow = 0;
+//	CAN2_Filter.FilterScale = CAN_FILTERSCALE_32BIT;
+
+	CAN2_ReadyToSend.tx_header.DLC = 0x08;
+	CAN2_ReadyToSend.tx_header.IDE = CAN_ID_STD;
+	CAN2_ReadyToSend.tx_header.RTR = CAN_RTR_DATA;
+	CAN2_ReallySend.tx_header.DLC = 0x08;
+	CAN2_ReallySend.tx_header.IDE = CAN_ID_STD;
+	CAN2_ReallySend.tx_header.RTR = CAN_RTR_DATA;
+	
+//	CAN2_Receive.rx_header.DLC = 0x08;//Õâ¸ö¶¼Ò»Ñù¾Í·ÅÕâÀï°É¡£
+//	CAN2_Receive.rx_header.RTR = CAN_RTR_DATA;
+//	CAN2_Receive.rx_header.IDE = CAN_ID_STD;
+//	
+//	HAL_CAN_ConfigFilter(&hcan2,&CAN2_Filter);//ÕâÀïÐ´´í£¬ÊÕ²»µ½¡£¡£
+
+//  HAL_CAN_ActivateNotification(&hcan2,CAN_IT_RX_FIFO0_MSG_PENDING);	
+//	HAL_CAN_ActivateNotification(&hcan2,CAN_IT_TX_MAILBOX_EMPTY);
+
+
+}
+
 
 void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
 {
@@ -149,6 +216,32 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
 
   /* USER CODE END CAN1_MspInit 1 */
   }
+	else if(canHandle->Instance==CAN2)
+  {
+  /* USER CODE BEGIN CAN2_MspInit 0 */
+
+  /* USER CODE END CAN2_MspInit 0 */
+    /* CAN2 clock enable */
+    __HAL_RCC_CAN2_CLK_ENABLE();
+    __HAL_RCC_CAN1_CLK_ENABLE();
+  
+    /**CAN2 GPIO Configuration    
+    PB5     ------> CAN2_RX
+    PB6     ------> CAN2_TX 
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF9_CAN2;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN CAN2_MspInit 1 */
+		
+		
+		
+  /* USER CODE END CAN2_MspInit 1 */
+  }
 }
 
 void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
@@ -175,6 +268,26 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 
   /* USER CODE END CAN1_MspDeInit 1 */
   }
+	else if(canHandle->Instance==CAN2)
+  {
+  /* USER CODE BEGIN CAN2_MspDeInit 0 */
+
+  /* USER CODE END CAN2_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_CAN2_CLK_DISABLE();
+    __HAL_RCC_CAN1_CLK_DISABLE();
+  
+    /**CAN2 GPIO Configuration    
+    PB5     ------> CAN2_RX
+    PB6     ------> CAN2_TX 
+    */
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_5|GPIO_PIN_6);
+
+  /* USER CODE BEGIN CAN2_MspDeInit 1 */
+
+  /* USER CODE END CAN2_MspDeInit 1 */
+  }
+
 } 
 
 /* USER CODE BEGIN 1 */
