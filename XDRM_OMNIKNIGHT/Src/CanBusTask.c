@@ -6,14 +6,26 @@
 
 volatile Encoder TurntableEncoder = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-Measure Motor1_Measure = {0,0,0,0,0,0,0};
-Measure Motor2_Measure = {0,0,0,0,0,0,0};
-Measure Motor3_Measure = {0,0,0,0,0,0,0};
-Measure Motor4_Measure = {0,0,0,0,0,0,0};
+Measure Chassis_Motor1_Measure = {0,0,0,0,0,0,0};
+Measure Chassis_Motor2_Measure = {0,0,0,0,0,0,0};
+Measure Chassis_Motor3_Measure = {0,0,0,0,0,0,0};
+Measure Chassis_Motor4_Measure = {0,0,0,0,0,0,0};
 
-Measure LBeltM_Measure = {0,0,0,0,0,0,0};
-Measure RBeltM_Measure = {0,0,0,0,0,0,0};
-Measure	ARMM_Measure = {0,0,0,0,0,0,0};
+Measure LiftChain_Motor1_Measure = {0,0,0,0,0,0,0};//1,2,3,4电机顺序和底盘一样，左上角开始顺时针
+Measure LiftChain_Motor2_Measure = {0,0,0,0,0,0,0};
+Measure LiftChain_Motor3_Measure = {0,0,0,0,0,0,0};
+Measure LiftChain_Motor4_Measure = {0,0,0,0,0,0,0};
+
+Measure LiftChain_Motor5_Measure = {0,0,0,0,0,0,0};//5，6位抬机械臂的链条电机
+Measure LiftChain_Motor6_Measure = {0,0,0,0,0,0,0};
+
+Measure Guide_Motor1_Measure = {0,0,0,0,0,0,0};
+Measure Guide_Motor2_Measure = {0,0,0,0,0,0,0};
+
+Measure FlipArm_Motor_Measure = {0,0,0,0,0,0,0};//7为左右移动机
+Measure	MoveArm_Motor_Measure = {0,0,0,0,0,0,0};
+
+
 /**
   * @brief  处理编码值,将其转换为连续的角度							//[0][1]机械角度
   * @param  msg电机由CAN回传的信息 v编码器结构体				//[2][3]实际转矩电流测量值
@@ -98,69 +110,125 @@ void EncoderProcess(volatile Encoder *v, Can_Msg *msg)
   * @param  None  朱利豪
   */
 
-//接收不需要怎么改
-//发送的形式想好了，直接把id也push进去然后pop的时候注意就行了
-//由频率决定发送的时机,想好了不知道可以不。
-//还要做的就是CAN2
-
 
 uint32_t can_count;
 
 
-void Can_Msg_Process(void)
+void CAN1_Msg_Process(void)
 {
 	can_count++;
 	CAN_Res_FrameCounter++;//可能会有点问题，暂时先加到这里
 	switch(CAN1_Receive.rx_header.StdId)
 	{
-			case CAN_BUS1_MOTOR1_FEEDBACK_MSG_ID:
+			case CAN_BUS1_CHASSISMOTOR1_FEEDBACK_MSG_ID:
 			{
 				ChassisFrameCounter[0]++;
 
-				get_measure(&Motor1_Measure, &CAN1_Receive.msg);
+				get_measure(&Chassis_Motor1_Measure, &CAN1_Receive.msg);
 
 			}
 			break;
-			case CAN_BUS1_MOTOR2_FEEDBACK_MSG_ID:
+			case CAN_BUS1_CHASSISMOTOR2_FEEDBACK_MSG_ID:
 			{
 				ChassisFrameCounter[1]++;
-				get_measure(&Motor2_Measure, &CAN1_Receive.msg);
+				get_measure(&Chassis_Motor2_Measure, &CAN1_Receive.msg);
 
 			}
 			break;
-			case CAN_BUS1_MOTOR3_FEEDBACK_MSG_ID:
+			case CAN_BUS1_CHASSISMOTOR3_FEEDBACK_MSG_ID:
 			{
 				ChassisFrameCounter[2]++;
-				get_measure(&Motor3_Measure, &CAN1_Receive.msg);
+				get_measure(&Chassis_Motor3_Measure, &CAN1_Receive.msg);
 
 			}
 			break;
-			case CAN_BUS1_MOTOR4_FEEDBACK_MSG_ID:
+			case CAN_BUS1_CHASSISMOTOR4_FEEDBACK_MSG_ID:
 			{
 				ChassisFrameCounter[3]++;
-				get_measure(&Motor4_Measure, &CAN1_Receive.msg);
+				get_measure(&Chassis_Motor4_Measure, &CAN1_Receive.msg);
 			}
 			break;
-			case CAN_BUS1_BELTMOTOR1_FEEDBACK_MSG_ID:
+			case CAN_BUS1_LIFTCHAINMOTOR5_FEEDBACK_MSG_ID:
 			{
-				RbeltFrameCounter++;
 
-				get_measure(&RBeltM_Measure, &CAN1_Receive.msg);
+				get_measure(&LiftChain_Motor5_Measure, &CAN1_Receive.msg);
 
 			}break;
-			case CAN_BUS1_BELTMOTOR2_FEEDBACK_MSG_ID://左边轮子为206
+			case CAN_BUS1_LIFTCHAINMOTOR6_FEEDBACK_MSG_ID://左边轮子为206
 			{
-				LbeltFrameCounter++;
-
-				get_measure(&LBeltM_Measure, &CAN1_Receive.msg);
+				get_measure(&LiftChain_Motor6_Measure, &CAN1_Receive.msg);
 
 			}break;
-			case CAN_BUS1_ARMMOTOR_FEEDBACK_MSG_ID:
+			
+			case CAN_BUS1_FLIPARMMOTOR_FEEDBACK_MSG_ID:
 			{
-				MotorArmFrameCounter++;
 				
-				get_measure(&ARMM_Measure,&CAN1_Receive.msg);
+				get_measure(&FlipArm_Motor_Measure,&CAN1_Receive.msg);
 				EncoderProcess(&TurntableEncoder,&CAN1_Receive.msg);
+
+			}break;
+			
+			case CAN_BUS1_MOVEARMMOTOR_FEEDBACK_MSG_ID:
+			{
+				
+				get_measure(&MoveArm_Motor_Measure,&CAN1_Receive.msg);
+				EncoderProcess(&TurntableEncoder,&CAN1_Receive.msg);
+			}break;	
+			default:
+			{
+	
+			}
+			break;
+		}
+}
+
+
+
+void CAN2_Msg_Process(void)
+{
+	can_count++;
+//	CAN2_Res_FrameCounter++;//可能会有点问题，暂时先加到这里
+	switch(CAN2_Receive.rx_header.StdId)
+	{
+			case CAN_BUS2_LIFTCHAINMOTOR1_FEEDBACK_MSG_ID:
+			{
+
+				get_measure(&LiftChain_Motor1_Measure, &CAN2_Receive.msg);
+			}
+			break;
+			case CAN_BUS2_LIFTCHAINMOTOR2_FEEDBACK_MSG_ID:
+			{
+				ChassisFrameCounter[1]++;
+				get_measure(&LiftChain_Motor2_Measure, &CAN2_Receive.msg);
+
+			}
+			break;
+			case CAN_BUS2_LIFTCHAINMOTOR3_FEEDBACK_MSG_ID:
+			{
+				ChassisFrameCounter[2]++;
+				get_measure(&LiftChain_Motor3_Measure, &CAN2_Receive.msg);
+
+			}
+			break;
+			case CAN_BUS2_LIFTCHAINMOTOR4_FEEDBACK_MSG_ID:
+			{
+				ChassisFrameCounter[3]++;
+				get_measure(&LiftChain_Motor4_Measure, &CAN2_Receive.msg);
+			}
+			break;
+			case CAN_BUS2_GUIDEMOTOR1_FEEDBACK_MSG_ID:
+			{
+		//		RbeltFrameCounter++;
+
+				get_measure(&Guide_Motor1_Measure, &CAN2_Receive.msg);
+
+			}break;
+			case CAN_BUS2_GUIDEMOTOR2_FEEDBACK_MSG_ID://左边轮子为206
+			{
+		//		LbeltFrameCounter++;
+
+				get_measure(&Guide_Motor2_Measure, &CAN2_Receive.msg);
+
 			}break;
 			default:
 			{
@@ -171,7 +239,13 @@ void Can_Msg_Process(void)
 }
 
 
-void Can_Send_CM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
+
+
+
+
+
+
+void CAN1_Send_CM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
 {
 	CAN1_ReadyToSend.tx_header.StdId = 0x200;
 	CAN1_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);
@@ -187,50 +261,84 @@ void Can_Send_CM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
 	
 }
 
-void Can_Send_BM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
+void CAN1_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
 {
 	CAN1_ReadyToSend.tx_header.StdId = 0x1FF;
-	CAN1_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);
+	CAN1_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);//上面链条的抬升
 	CAN1_ReadyToSend.msg.data[1] = (unsigned char)iq_1;
 	CAN1_ReadyToSend.msg.data[2] = (unsigned char)( iq_2 >>8);
 	CAN1_ReadyToSend.msg.data[3] = (unsigned char)iq_2;
 	CAN1_ReadyToSend.msg.data[4] = (int16_t)(AMRotatePID.output)>>8;
 	CAN1_ReadyToSend.msg.data[5] = (unsigned char)(AMRotatePID.output);
-	CAN1_ReadyToSend.msg.data[6] = (unsigned char)( iq_4 >>8);
-	CAN1_ReadyToSend.msg.data[7] = (unsigned char)iq_4;
+	CAN1_ReadyToSend.msg.data[6] = (int16_t)(AMMovePID.output)>>8;
+	CAN1_ReadyToSend.msg.data[7] = (unsigned char)AMMovePID.output;
 	
 	CAN_bufferPush(&Que_CAN1_Tx,CAN1_ReadyToSend);
+}
+
+void CAN2_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
+{
+	CAN2_ReadyToSend.tx_header.StdId = 0x200;
+	CAN2_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);
+	CAN2_ReadyToSend.msg.data[1] = (unsigned char)iq_1;
+	CAN2_ReadyToSend.msg.data[2] = (unsigned char)( iq_2 >>8);
+	CAN2_ReadyToSend.msg.data[3] = (unsigned char)iq_2;
+	CAN2_ReadyToSend.msg.data[4] = (unsigned char)( iq_3 >>8);
+	CAN2_ReadyToSend.msg.data[5] = (unsigned char)iq_3;
+	CAN2_ReadyToSend.msg.data[6] = (unsigned char)( iq_4 >>8);
+	CAN2_ReadyToSend.msg.data[7] = (unsigned char)iq_4;
+	
+	CAN_bufferPush(&Que_CAN2_Tx,CAN2_ReadyToSend);
 
 }
 
+
+void CAN2_Send_GM(int16_t iq_1,int16_t iq_2)
+{
+	CAN2_ReadyToSend.tx_header.StdId = 0x1FF;
+	CAN2_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);
+	CAN2_ReadyToSend.msg.data[1] = (unsigned char)iq_1;
+	CAN2_ReadyToSend.msg.data[2] = (unsigned char)( iq_2 >>8);
+	CAN2_ReadyToSend.msg.data[3] = (unsigned char)iq_2;
+//	CAN2_ReadyToSend.msg.data[4] = 0x00;//先注释着，反正没用，不知道会不会影响帧率，或者不知道会不会出问题
+//	CAN2_ReadyToSend.msg.data[5] = 0x00;
+//	CAN2_ReadyToSend.msg.data[6] = 0x00;
+//	CAN2_ReadyToSend.msg.data[7] = 0x00;
+	
+	CAN_bufferPush(&Que_CAN2_Tx,CAN2_ReadyToSend);
+
+}
+
+
+
+
+
+
+
 uint32_t TxMailFreeNum = 0;
+
+
+
+
+
 
 void Can_Send(void)
 {		
 
 
-		CAN2_ReallySend.tx_header.StdId = 0x200;
-		CAN2_ReallySend.msg.data[0] = 0x01;
-		CAN2_ReallySend.msg.data[1] = 0x11;
-		CAN2_ReallySend.msg.data[2] = 0x01;
-		CAN2_ReallySend.msg.data[3] = 0x11;
-		CAN2_ReallySend.msg.data[4] = 0x01;
-		CAN2_ReallySend.msg.data[5] = 0x11;
-		CAN2_ReallySend.msg.data[6] = 0x01;
-		CAN2_ReallySend.msg.data[7] = 0x01;
 
 	uint16_t testlen = CAN_bufferlen(&Que_CAN1_Tx);
+	uint16_t testlen2 = CAN_bufferlen(&Que_CAN2_Tx);
 //如果都在一个线程里发的话等发的数据多了就会不够用了
 //想不出更好方法，暂且就这样，can线程里面发一次，剩下的到中断里发
 //时间触发模式好像可以，但是没必要而且数据就少了
 		CAN_bufferPop(&Que_CAN1_Tx,&CAN1_ReallySend);
+		CAN_bufferPop(&Que_CAN2_Tx,&CAN2_ReallySend);
 
-//		HAL_CAN_AddTxMessage(&hcan1,&CAN1_ReallySend.tx_header,CAN1_ReallySend.msg.data,(uint32_t*)CAN_TX_MAILBOX0);//若0邮箱满了，就自动加到下一个
+
+		HAL_CAN_AddTxMessage(&hcan1,&CAN1_ReallySend.tx_header,CAN1_ReallySend.msg.data,(uint32_t*)CAN_TX_MAILBOX0);//若0邮箱满了，就自动加到下一个
 		HAL_CAN_AddTxMessage(&hcan2,&CAN2_ReallySend.tx_header,CAN2_ReallySend.msg.data,(uint32_t*)CAN_TX_MAILBOX0);//若0邮箱满了，就自动加到下一个
 
-
-	
-	
 		CAN_Send_FrameCounter++;
 
 
@@ -252,13 +360,27 @@ void Can_Send(void)
 
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef* hcan)
 {
-	uint16_t testlen = CAN_bufferlen(&Que_CAN1_Tx);
-		if(testlen>0)//如果都在一个线程里发的话等发的数据多了就会不够用了
+	if(hcan->Instance == CAN1)
 	{
-		CAN_bufferPop(&Que_CAN1_Tx,&CAN1_ReallySend);
-		HAL_CAN_AddTxMessage(&hcan1,&CAN1_ReallySend.tx_header,CAN1_ReallySend.msg.data,(uint32_t*)CAN_TX_MAILBOX0);
-		
+		uint16_t testlen = CAN_bufferlen(&Que_CAN1_Tx);
+		if(testlen>0)//如果都在一个线程里发的话等发的数据多了就会不够用了
+		{
+			CAN_bufferPop(&Que_CAN1_Tx,&CAN1_ReallySend);
+			HAL_CAN_AddTxMessage(&hcan1,&CAN1_ReallySend.tx_header,CAN1_ReallySend.msg.data,(uint32_t*)CAN_TX_MAILBOX0);
+			
+		}
 	}
+	if(hcan->Instance == CAN2)
+	{
+		uint16_t testlen = CAN_bufferlen(&Que_CAN2_Tx);
+		if(testlen>0)//如果都在一个线程里发的话等发的数据多了就会不够用了
+		{
+			CAN_bufferPop(&Que_CAN2_Tx,&CAN2_ReallySend);
+			HAL_CAN_AddTxMessage(&hcan2,&CAN2_ReallySend.tx_header,CAN2_ReallySend.msg.data,(uint32_t*)CAN_TX_MAILBOX0);
+			
+		}
+	}
+	
 }
 
 
@@ -269,11 +391,16 @@ void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef* hcan)
   */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-	HAL_CAN_GetRxMessage(&hcan1,CAN_RX_FIFO0,&CAN1_Receive.rx_header,CAN1_Receive.msg.data);//
-	
-		
-	Can_Msg_Process();	
-
+	if(hcan->Instance == CAN1)
+	{
+		HAL_CAN_GetRxMessage(&hcan1,CAN_RX_FIFO0,&CAN1_Receive.rx_header,CAN1_Receive.msg.data);//
+		CAN1_Msg_Process();	
+	}
+	else if(hcan->Instance == CAN2)
+	{
+		HAL_CAN_GetRxMessage(&hcan2,CAN_RX_FIFO0,&CAN2_Receive.rx_header,CAN2_Receive.msg.data);//这里fifo不知是不是要改
+		CAN2_Msg_Process();	
+	}
 													
 }
 

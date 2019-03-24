@@ -5,14 +5,23 @@
 
 #include "Config.h"
 
-
-#define CAN_BUS1_MOTOR1_FEEDBACK_MSG_ID           0x201
-#define CAN_BUS1_MOTOR2_FEEDBACK_MSG_ID           0x202
-#define CAN_BUS1_MOTOR3_FEEDBACK_MSG_ID           0x203
-#define CAN_BUS1_MOTOR4_FEEDBACK_MSG_ID           0x204
-#define CAN_BUS1_BELTMOTOR1_FEEDBACK_MSG_ID				0x205
-#define CAN_BUS1_BELTMOTOR2_FEEDBACK_MSG_ID				0x206
-#define CAN_BUS1_ARMMOTOR_FEEDBACK_MSG_ID					0x207
+/*以下是CAN1总线上的ID，为抓取及基本运动所用电机*/
+#define CAN_BUS1_CHASSISMOTOR1_FEEDBACK_MSG_ID           0x201
+#define CAN_BUS1_CHASSISMOTOR2_FEEDBACK_MSG_ID           0x202
+#define CAN_BUS1_CHASSISMOTOR3_FEEDBACK_MSG_ID           0x203
+#define CAN_BUS1_CHASSISMOTOR4_FEEDBACK_MSG_ID           0x204
+#define CAN_BUS1_LIFTCHAINMOTOR5_FEEDBACK_MSG_ID         0x205//上面的两个链条电机左低右高
+#define CAN_BUS1_LIFTCHAINMOTOR6_FEEDBACK_MSG_ID         0x206
+#define CAN_BUS1_FLIPARMMOTOR_FEEDBACK_MSG_ID						 0x207
+#define CAN_BUS1_MOVEARMMOTOR_FEEDBACK_MSG_ID						 0x208
+				
+/*以下是CAN2总线上的ID，为上岛部分所用电机*/
+#define CAN_BUS2_LIFTCHAINMOTOR1_FEEDBACK_MSG_ID         0x201//四个链条电机id顺序与麦轮电机相同，从左上角开始顺时针
+#define CAN_BUS2_LIFTCHAINMOTOR2_FEEDBACK_MSG_ID         0x202
+#define CAN_BUS2_LIFTCHAINMOTOR3_FEEDBACK_MSG_ID         0x203
+#define CAN_BUS2_LIFTCHAINMOTOR4_FEEDBACK_MSG_ID         0x204
+#define CAN_BUS2_GUIDEMOTOR1_FEEDBACK_MSG_ID             0x205//左低右高
+#define CAN_BUS2_GUIDEMOTOR2_FEEDBACK_MSG_ID             0x206
 
 
 #define CAN_SEND_NUM 3
@@ -46,20 +55,37 @@ typedef struct{
 }Encoder;
 
 
-void Can_Send_CM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
-void Can_Send(void);
+void CAN1_Send_CM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
+void CAN1_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
+void CAN2_Send_GM(int16_t iq_1,int16_t iq_2);
+void CAN2_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
+void CAN_Send(void);
+void CAN1_Msg_Process(void);
+void CAN2_Msg_Process(void);
 void Can_Send_Task(void const * argument);
-void Can_Msg_Process(void);
-void Can_Send_BM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
 
-extern Measure Motor1_Measure;
-extern Measure Motor2_Measure;
-extern Measure Motor3_Measure;
-extern Measure Motor4_Measure;
+extern Measure Chassis_Motor1_Measure;
+extern Measure Chassis_Motor2_Measure;
+extern Measure Chassis_Motor3_Measure;
+extern Measure Chassis_Motor4_Measure;
 
-extern Measure LBeltM_Measure;
-extern Measure RBeltM_Measure;
-extern Measure ARMM_Measure;
+extern Measure LiftChain_Motor1_Measure;//1,2,3,4电机顺序和底盘一样，左上角开始顺时针
+extern Measure LiftChain_Motor2_Measure;
+extern Measure LiftChain_Motor3_Measure;
+extern Measure LiftChain_Motor4_Measure;
+
+extern Measure LiftChain_Motor5_Measure;//5，6位抬机械臂的链条电机
+extern Measure LiftChain_Motor6_Measure;
+
+extern Measure Guide_Motor1_Measure;
+extern Measure Guide_Motor2_Measure;
+
+extern Measure FlipArm_Motor_Measure;//7为左右移动机
+extern Measure MoveArm_Motor_Measure;
+
+
+
+
 
 extern volatile Encoder TurntableEncoder;
 #endif

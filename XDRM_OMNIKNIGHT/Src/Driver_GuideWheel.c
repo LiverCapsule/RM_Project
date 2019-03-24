@@ -5,6 +5,9 @@
 #include "Driver_Sensor.h"
 #include "math.h"
 #include "StatusMachine.h"
+#include "CanBusTask.h"
+#include "DriverLib_PID.h"
+
 extern uint32_t count1;
 extern uint32_t count2;
 
@@ -164,9 +167,16 @@ void MotorSpeedSet_SM(void)
 		}break;
 	}
 }
+
+
+uint16_t ref_n = 400;
 void GuideWheel_Control(void)
 {
-	MotorSpeedSet_SM();
+	//MotorSpeedSet_SM();
+	
+	GM1SpeedPID.kp = 10;
+	PID_Task(&GM1SpeedPID,ref_n,Guide_Motor1_Measure.speed_rpm);
+	CAN2_Send_GM(GM1SpeedPID.output,GM1SpeedPID.output);
 }
 
 	

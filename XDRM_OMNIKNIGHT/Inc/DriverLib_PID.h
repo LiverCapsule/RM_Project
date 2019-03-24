@@ -116,27 +116,7 @@ enum
 }
 
 
-#define BELT_MOTOR_SPEED_PID_DEFAULT \
-{\
-	0,\
-	0,\
-	{0,0,0,0},\
-	CHASSIS_SPEED_KP_DEFAULTS,\
-	CHASSIS_SPEED_KI_DEFAULTS,\
-	CHASSIS_SPEED_KD_DEFAULTS,\
-	0,\
-	0,\
-	0,\
-	13000,\
-	13000,\
-	13000,\
-	0,\
-	13000,\
-	0,\
-	POSITION_PID,\
-	&PID_Calc,\
-	&PID_Reset,\
-}
+
 #define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \
 {\
 	0,\
@@ -159,6 +139,29 @@ enum
 	&PID_Reset,\
 }
 
+
+
+#define LIFTCHAIN_MOTOR_SPEED_PID_DEFAULT \
+{\
+	0,\
+	0,\
+	{0,0,0,0},\
+	CHASSIS_SPEED_KP_DEFAULTS,\
+	CHASSIS_SPEED_KI_DEFAULTS,\
+	CHASSIS_SPEED_KD_DEFAULTS,\
+	0,\
+	0,\
+	0,\
+	13000,\
+	13000,\
+	13000,\
+	0,\
+	13000,\
+	0,\
+	POSITION_PID,\
+	&PID_Calc,\
+	&PID_Reset,\
+}
 
 
 
@@ -184,16 +187,26 @@ typedef __packed struct PID_Regulator_t//’‚∏ˆ”–µ„∆Êπ÷°£°£ «“ÚŒ™œ¬√Ê”–∫Ø ˝÷∏’Î£°À
 	void (*Reset)(struct PID_Regulator_t *pid);
 }PID_Regulator_t;
 
+
+
 extern PID_Regulator_t CMRotatePID; 
 extern PID_Regulator_t CM1SpeedPID;
 extern PID_Regulator_t CM2SpeedPID;
 extern PID_Regulator_t CM3SpeedPID;
 extern PID_Regulator_t CM4SpeedPID;
-//extern PID_Regulator_t BeltM1PositionPID;
-extern PID_Regulator_t LBMSpeedPID;
-//extern PID_Regulator_t BeltM2PositionPID;
-extern PID_Regulator_t RBMSpeedPID;
+
+extern PID_Regulator_t LCM1SpeedPID;
+extern PID_Regulator_t LCM2SpeedPID;
+extern PID_Regulator_t LCM3SpeedPID;
+extern PID_Regulator_t LCM4SpeedPID;
+extern PID_Regulator_t LCM5SpeedPID;
+extern PID_Regulator_t LCM6SpeedPID;
+
 extern PID_Regulator_t AMRotatePID;
+extern PID_Regulator_t AMMovePID;
+extern PID_Regulator_t GM1SpeedPID;
+extern PID_Regulator_t GM2SpeedPID;
+
 
 void PID_Reset(PID_Regulator_t *pid);
 void PID_Calc(PID_Regulator_t *pid);

@@ -98,6 +98,7 @@ void ARM_Set_Current(void)
 		}
 		else
 		{
+			
 		//这个发送在同步带的can发送里面顺便发掉
 		}
 

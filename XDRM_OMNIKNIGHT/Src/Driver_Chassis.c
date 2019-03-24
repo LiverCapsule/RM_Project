@@ -36,10 +36,10 @@ void CM_Get_PID(void)
 
 void 	CM_Calc_Output(void)
 {
-	PID_Task(&CM1SpeedPID,ChassisData.ChassisWheelSpeedRef[0],Motor1_Measure.speed_rpm/10.0);//float /10.0
-	PID_Task(&CM2SpeedPID,ChassisData.ChassisWheelSpeedRef[1],Motor2_Measure.speed_rpm/10.0);
-	PID_Task(&CM3SpeedPID,ChassisData.ChassisWheelSpeedRef[2],Motor3_Measure.speed_rpm/10.0);
-	PID_Task(&CM4SpeedPID,ChassisData.ChassisWheelSpeedRef[3],Motor4_Measure.speed_rpm/10.0);
+	PID_Task(&CM1SpeedPID,ChassisData.ChassisWheelSpeedRef[0],Chassis_Motor1_Measure.speed_rpm/10.0);//float /10.0
+	PID_Task(&CM2SpeedPID,ChassisData.ChassisWheelSpeedRef[1],Chassis_Motor2_Measure.speed_rpm/10.0);
+	PID_Task(&CM3SpeedPID,ChassisData.ChassisWheelSpeedRef[2],Chassis_Motor3_Measure.speed_rpm/10.0);
+	PID_Task(&CM4SpeedPID,ChassisData.ChassisWheelSpeedRef[3],Chassis_Motor4_Measure.speed_rpm/10.0);
 
 
 	if(CM1SpeedPID.output>-700 && CM1SpeedPID.output<700 ) CM1SpeedPID.output=0;//我们这样是不是就不用加ki就可以停在斜坡上了
@@ -306,10 +306,10 @@ void CM_Set_Current(void)
 {
 		if(RC_CtrlData.rc.s2 == 2)
 		{
-		 Can_Send_CM(0,0,0,0);
+		 CAN1_Send_CM(0,0,0,0);
 		}
 		else
-		Can_Send_CM( CHASSIS_SPEED_ATTENUATION * CM1SpeedPID.output, \
+		CAN1_Send_CM( CHASSIS_SPEED_ATTENUATION * CM1SpeedPID.output, \
 								 CHASSIS_SPEED_ATTENUATION * CM2SpeedPID.output, \
 								 CHASSIS_SPEED_ATTENUATION * CM3SpeedPID.output, \
 								 CHASSIS_SPEED_ATTENUATION * CM4SpeedPID.output);		

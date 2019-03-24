@@ -76,6 +76,7 @@ CAN_FilterTypeDef CAN2_Filter;
 
 CAN_HandleTypeDef hcan2;
 CAN_FilterTypeDef CAN1_Filter;
+
 /* USER CODE END 0 */
 
 
@@ -103,7 +104,7 @@ void MX_CAN1_Init(void)//±æ¿¥“ª÷±“≤ «≥ı ºªØ”–Œ Ã‚£¨÷Æ∫Û…’¡À“ªœ¬÷Æ«∞¥˙¬Î”÷ø…“‘¡À°
     _Error_Handler(__FILE__, __LINE__);
   }
 	  HAL_CAN_Start(&hcan1);
-//	Can1_Filter.SlaveStartFilterBank = ;“ª∏ˆcanæÕ≤ª”√π‹
+	CAN1_Filter.SlaveStartFilterBank = 14;//“ª∏ˆcanæÕ≤ª”√π‹/////
 	CAN1_Filter.FilterActivation = ENABLE;
 	CAN1_Filter.FilterBank = 0;
 	CAN1_Filter.FilterFIFOAssignment = CAN_FilterFIFO0;
@@ -158,16 +159,16 @@ void MX_CAN2_Init(void)//1 «can2–æ∆¨£¨2 «¡¨can1µƒ«Èøˆœ¬can2£¨ «≤ª «“ÚŒ™can1√ª–—
   }
 	
 	HAL_CAN_Start(&hcan2);
-//	CAN2_Filter.SlaveStartFilterBank = 14;//∂‘”¶µƒ «æ…ø‚µƒBankNumber,“ª∏ˆcanæÕ≤ª”√π‹
-//	CAN2_Filter.FilterActivation = ENABLE;
-//	CAN2_Filter.FilterBank = 14;
-//	CAN2_Filter.FilterFIFOAssignment = CAN_FilterFIFO0;
-//	CAN2_Filter.FilterIdHigh = 0;
-//	CAN2_Filter.FilterIdLow = 0;
-//	CAN2_Filter.FilterMode = CAN_FILTERMODE_IDMASK;//±Í ∂∑˚—⁄¬Î£¨32Œª—⁄¬Î32Œª±Í ∂∑˚//¡Ì“ª÷÷ƒ£ ΩæÕø…“‘ «¡Ω∏ˆ32Œª±Í ∂∑˚°£
-//	CAN2_Filter.FilterMaskIdHigh = 0;
-//	CAN2_Filter.FilterMaskIdLow = 0;
-//	CAN2_Filter.FilterScale = CAN_FILTERSCALE_32BIT;
+	CAN2_Filter.SlaveStartFilterBank = 14;//∂‘”¶µƒ «æ…ø‚µƒBankNumber,“ª∏ˆcanæÕ≤ª”√π‹
+	CAN2_Filter.FilterActivation = ENABLE;
+	CAN2_Filter.FilterBank = 14;
+	CAN2_Filter.FilterFIFOAssignment = CAN_FilterFIFO0;
+	CAN2_Filter.FilterIdHigh = 0;
+	CAN2_Filter.FilterIdLow = 0;
+	CAN2_Filter.FilterMode = CAN_FILTERMODE_IDMASK;//±Í ∂∑˚—⁄¬Î£¨32Œª—⁄¬Î32Œª±Í ∂∑˚//¡Ì“ª÷÷ƒ£ ΩæÕø…“‘ «¡Ω∏ˆ32Œª±Í ∂∑˚°£
+	CAN2_Filter.FilterMaskIdHigh = 0;
+	CAN2_Filter.FilterMaskIdLow = 0;
+	CAN2_Filter.FilterScale = CAN_FILTERSCALE_32BIT;
 
 	CAN2_ReadyToSend.tx_header.DLC = 0x08;
 	CAN2_ReadyToSend.tx_header.IDE = CAN_ID_STD;
@@ -176,14 +177,14 @@ void MX_CAN2_Init(void)//1 «can2–æ∆¨£¨2 «¡¨can1µƒ«Èøˆœ¬can2£¨ «≤ª «“ÚŒ™can1√ª–—
 	CAN2_ReallySend.tx_header.IDE = CAN_ID_STD;
 	CAN2_ReallySend.tx_header.RTR = CAN_RTR_DATA;
 	
-//	CAN2_Receive.rx_header.DLC = 0x08;//’‚∏ˆ∂º“ª—˘æÕ∑≈’‚¿Ô∞…°£
-//	CAN2_Receive.rx_header.RTR = CAN_RTR_DATA;
-//	CAN2_Receive.rx_header.IDE = CAN_ID_STD;
-//	
-//	HAL_CAN_ConfigFilter(&hcan2,&CAN2_Filter);//’‚¿Ô–¥¥Ì£¨ ’≤ªµΩ°£°£
+	CAN2_Receive.rx_header.DLC = 0x08;//’‚∏ˆ∂º“ª—˘æÕ∑≈’‚¿Ô∞…°£
+	CAN2_Receive.rx_header.RTR = CAN_RTR_DATA;
+	CAN2_Receive.rx_header.IDE = CAN_ID_STD;
+	
+	HAL_CAN_ConfigFilter(&hcan2,&CAN2_Filter);
 
-//  HAL_CAN_ActivateNotification(&hcan2,CAN_IT_RX_FIFO0_MSG_PENDING);	
-//	HAL_CAN_ActivateNotification(&hcan2,CAN_IT_TX_MAILBOX_EMPTY);
+  HAL_CAN_ActivateNotification(&hcan2,CAN_IT_RX_FIFO0_MSG_PENDING);	
+	HAL_CAN_ActivateNotification(&hcan2,CAN_IT_TX_MAILBOX_EMPTY);
 
 
 }
@@ -205,9 +206,9 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     PB8     ------> CAN1_RX
     PB9     ------> CAN1_TX 
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_0;//√ø∏ˆcanø⁄∂‘”¶≤ªÕ¨µƒ“˝Ω≈£°≤Óƒƒ∏ˆÕ∑æÕ”√ƒƒ∏ˆ“˝Ω≈
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_0;//CAN1”√D0∫ÕD1
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;			//ø…ƒ‹≤ª «’‚∏ˆŒ Ã‚£¨µ´ «÷¡…Ÿcube…˙≥…µƒƒ«¡Ω∏ˆ“˝Ω≈≤ª∫√”√
+    GPIO_InitStruct.Pull = GPIO_NOPULL;					//∏¸∂Àø⁄µƒ∏¥”√∫Õ÷ÿ”≥…‰ø…ƒ‹”–πÿœµ£¨µ´ «◊‘º∫√ª’“µΩhalø‚¿Ô√Ê÷ÿ”≥…‰ ±÷” πƒ‹µƒ∫Ø ˝£¨À˘“‘ƒø«∞ªπ≤ª»∑∂®
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF9_CAN1;
     HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
@@ -229,7 +230,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     PB5     ------> CAN2_RX
     PB6     ------> CAN2_TX 
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13;
+    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13;//»Á…œ£¨CAN2”√B12∫ÕB13
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;

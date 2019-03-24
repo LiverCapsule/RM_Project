@@ -93,14 +93,18 @@ uint16_t DBUSFrameCounter = 0;
 uint16_t ChassisFrameRate[4] = {0};
 uint16_t ChassisFrameCounter[4] = {0};
 
-uint16_t LbeltFrameRate = 0;
-uint16_t LbeltFrameCounter = 0;
+uint16_t LiftChainFrameRate[6] = {0};
+uint16_t LiftChainFrameCounter[6] = {0};
 
-uint16_t RbeltFrameRate = 0;
-uint16_t RbeltFrameCounter = 0;
+uint16_t GuideMotorFrameRate[2] = {0};
+uint16_t GuideMotorFrameCounter[2] = {0};
 
-uint16_t MotorArmFrameRate = 0;
-uint16_t MotorArmFrameCounter = 0;
+uint16_t MoveArmMotorFrameRate = 0;
+uint16_t MoveArmMotorFrameCounter = 0;
+
+uint16_t FlipArmMotorFrameRate = 0;
+uint16_t FlipArmMotorFrameCounter = 0;
+
 
 uint16_t CAN_Send_FrameRate = 0;
 uint16_t CAN_Send_FrameCounter = 0;
@@ -143,16 +147,10 @@ void Task_Monitor(void)
 			ChassisFrameCounter[3] = 0;
 			
             //伸缩腿电机帧率统计
-			LbeltFrameRate = LbeltFrameCounter*2;
-			LbeltFrameCounter = 0;
-		
-			RbeltFrameRate = RbeltFrameCounter*2;
-			RbeltFrameCounter = 0;
+	
 			
             //机械臂电机帧率统计
-			MotorArmFrameRate = MotorArmFrameCounter*2;
-			MotorArmFrameCounter = 0;
-			
+	
             //CAN收发帧率统计
 			CAN_Send_FrameRate = CAN_Send_FrameCounter*2;
 			CAN_Send_FrameCounter = 0;
@@ -212,33 +210,33 @@ void Task_Monitor(void)
 		}
 		
         //伸缩腿电机帧率过低
-		if(RbeltFrameRate < 200)
-		{
-			Set_Error_Flag(LOST_ERROR_MOTOR4);
-		}
-		else
-		{
-			Reset_Error_Flag(LOST_ERROR_MOTOR4);
-		}
-		
-		if(LbeltFrameRate < 200)
-		{
-			Set_Error_Flag(LOST_ERROR_MOTOR_LBELT);
-		}
-		else
-		{
-			Reset_Error_Flag(LOST_ERROR_MOTOR_RBELT);
-		}
+//		if(RbeltFrameRate < 200)
+//		{
+//			Set_Error_Flag(LOST_ERROR_MOTOR4);
+//		}
+//		else
+//		{
+//			Reset_Error_Flag(LOST_ERROR_MOTOR4);
+//		}
+//		
+//		if(LbeltFrameRate < 200)
+//		{
+//			Set_Error_Flag(LOST_ERROR_MOTOR_LBELT);
+//		}
+//		else
+//		{
+//			Reset_Error_Flag(LOST_ERROR_MOTOR_RBELT);
+//		}
 		
         //机械臂电机帧率过低
-		if(MotorArmFrameRate < 200)
-		{
-			Set_Error_Flag(LOST_ERROR_MOTOR_ARM);
-		}
-		else
-		{
-			Reset_Error_Flag(LOST_ERROR_MOTOR4);
-		}
+//		if(MotorArmFrameRate < 200)
+//		{
+//			Set_Error_Flag(LOST_ERROR_MOTOR_ARM);
+//		}
+//		else
+//		{
+//			Reset_Error_Flag(LOST_ERROR_MOTOR4);
+//		}
         //CAN收发帧率过低
         if(CAN_Send_FrameRate < 400)
 		{

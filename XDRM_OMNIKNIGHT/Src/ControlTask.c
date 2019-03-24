@@ -24,9 +24,13 @@ void ControlTask(void)
 	if(time_tick_1ms%4==0)
 	{
 		Chassis_Control();
+		Manipulator_Control();
 	}
-	Manipulator_Control();
-	GuideWheel_Control();
+	if(time_tick_1ms%10 == 0)
+	{
+		GuideWheel_Control();
+	}
+	
 	Belt_Control();
 	
 }

@@ -20,6 +20,15 @@ extern uint8_t Back_C_flag;
 extern uint8_t Back_GW_flag;
 extern uint32_t tick_c_1;
 
+
+
+//总共只需要给一个电机算速度值
+//其他电机只需要取他的相反数或者等值
+
+
+
+
+
 void Belt_Move_Up(void)
 {
 	static int32_t LBM_Angle = 0;
@@ -29,11 +38,11 @@ void Belt_Move_Up(void)
 	BeltMotorSpeedRef[1] = raise_speed;
 	if(BM_AngelGet == 1)
 	{
-		LBM_Angle = LBeltM_Measure.ecd_angle;
-		RBM_Angle = RBeltM_Measure.ecd_angle;
+		LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
+		RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
 		BM_AngelGet = 0;
 	}
-	if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+	if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
 	{
 		BeltMotorSpeedRef[0] = 0;
 		BeltMotorSpeedRef[1] = 0;
@@ -64,11 +73,11 @@ void Belt_Move_Down(void)
 	BeltMotorSpeedRef[1] = -raise_speed;
 	if(BM_AngelGet == 1)
 	{
-		LBM_Angle = LBeltM_Measure.ecd_angle;
-		RBM_Angle = RBeltM_Measure.ecd_angle;
+		LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
+		RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
 		BM_AngelGet = 0;
 	}
-	if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+	if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
 	{
 		BeltMotorSpeedRef[0] = 100;
 		BeltMotorSpeedRef[1] = -100;
@@ -96,25 +105,25 @@ void Belt_Move_Down(void)
 void BM_Get_PID(void)
 {
 
-	RBMSpeedPID.kp = bmkp;//60
-	RBMSpeedPID.ki = 0;
-	RBMSpeedPID.kd = 0;//
+	LCM1SpeedPID.kp = bmkp;//60
+	LCM1SpeedPID.ki = 0;
+	LCM1SpeedPID.kd = 0;//
 	
 	
-	LBMSpeedPID.kp = bmkp;//60
-	LBMSpeedPID.ki = 0;
-	LBMSpeedPID.kd = 0;//
+	LCM2SpeedPID.kp = bmkp;//60
+	LCM2SpeedPID.ki = 0;
+	LCM2SpeedPID.kd = 0;//
 
 }
 
 
 void 	BM_Calc_Output(void)
 {
-	PID_Task(&LBMSpeedPID,BeltMotorSpeedRef[0],LBeltM_Measure.speed_rpm/10.0);//float /10.0
-	PID_Task(&RBMSpeedPID,BeltMotorSpeedRef[1],RBeltM_Measure.speed_rpm/10.0);
+	PID_Task(&LCM2SpeedPID,BeltMotorSpeedRef[0],LiftChain_Motor1_Measure.speed_rpm/10.0);//float /10.0
+	PID_Task(&LCM1SpeedPID,BeltMotorSpeedRef[1],LiftChain_Motor2_Measure.speed_rpm/10.0);
 
-	if(LBMSpeedPID.output>-800 && LBMSpeedPID.output<800 ) LBMSpeedPID.output=0;
-	if(RBMSpeedPID.output>-800 && RBMSpeedPID.output<800 ) RBMSpeedPID.output=0;
+	if(LCM2SpeedPID.output>-800 && LCM2SpeedPID.output<800 ) LCM2SpeedPID.output=0;
+	if(LCM1SpeedPID.output>-800 && LCM1SpeedPID.output<800 ) LCM1SpeedPID.output=0;
 
 
 }
@@ -144,11 +153,11 @@ void BM_Get_SpeedRef(void)
 				}
 				if(count>13)//1000/72
 				{
-					LBM_Angle = LBeltM_Measure.ecd_angle;
-					RBM_Angle = RBeltM_Measure.ecd_angle;
+					LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
+					RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
 					count = 0;
 				}
-				if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+				if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
 				{
 					static int ii = 0;
 					BeltMotorSpeedRef[0] = 100;
@@ -165,7 +174,7 @@ void BM_Get_SpeedRef(void)
 				BeltMotorSpeedRef[0] = -raise_speed;
 				BeltMotorSpeedRef[1] = raise_speed;
 			static int ii = 0;
-				if(((RBeltM_Measure.ecd_angle<(RBM_Angle-1200))&&(LBeltM_Measure.ecd_angle>(LBM_Angle+1200)))||(ii >= 1))
+				if(((LiftChain_Motor2_Measure.ecd_angle<(RBM_Angle-1200))&&(LiftChain_Motor1_Measure.ecd_angle>(LBM_Angle+1200)))||(ii >= 1))
 				{	
 					ii++;//这个ii是怕电机卡在临界处,上下抖动//顺便把标志位变化
 					if(ii == 1)
@@ -182,7 +191,7 @@ void BM_Get_SpeedRef(void)
 				{
 					BeltMotorSpeedRef[0] = raise_speed;//250
 					BeltMotorSpeedRef[1] = -raise_speed;
-					if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+					if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
 					{
 						BeltMotorSpeedRef[0] = 100;
 						BeltMotorSpeedRef[1] = -100;//120也行
@@ -201,7 +210,7 @@ void BM_Get_SpeedRef(void)
 					BeltMotorSpeedRef[0] = -raise_speed;
 					BeltMotorSpeedRef[1] = raise_speed;
 					static int ii = 0;
-					if(((RBeltM_Measure.ecd_angle<RBM_Angle)&&(LBeltM_Measure.ecd_angle>LBM_Angle))||ii >=1)
+					if(((LiftChain_Motor2_Measure.ecd_angle<RBM_Angle)&&(LiftChain_Motor1_Measure.ecd_angle>LBM_Angle))||ii >=1)
 					{
 						ii++;
 						//finish
@@ -224,11 +233,11 @@ void BM_Get_SpeedRef(void)
 				BeltMotorSpeedRef[1] = -raise_speed;
 				if(BM_AngelGet == 1)
 				{
-					LBM_Angle = LBeltM_Measure.ecd_angle;
-					RBM_Angle = RBeltM_Measure.ecd_angle;
+					LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
+					RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
 					BM_AngelGet = 0;
 				}
-				if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+				if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
 				{
 					BeltMotorSpeedRef[0] = 100;
 					BeltMotorSpeedRef[1] = -100;
@@ -241,11 +250,11 @@ void BM_Get_SpeedRef(void)
 				BeltMotorSpeedRef[1] = raise_speed;
 				if(BM_AngelGet == 1)
 				{
-					LBM_Angle = LBeltM_Measure.ecd_angle;
-					RBM_Angle = RBeltM_Measure.ecd_angle;
+					LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
+					RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
 					BM_AngelGet = 0;
 				}
-				if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+				if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
 				{
 					BeltMotorSpeedRef[0] = 0;
 					BeltMotorSpeedRef[1] = 0;
@@ -258,11 +267,11 @@ void BM_Get_SpeedRef(void)
 				BeltMotorSpeedRef[1] = -raise_speed;
 				if(BM_AngelGet == 1)
 				{
-					LBM_Angle = LBeltM_Measure.ecd_angle;
-					RBM_Angle = RBeltM_Measure.ecd_angle;
+					LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
+					RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
 					BM_AngelGet = 0;
 				}
-				if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+				if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
 				{
 					BeltMotorSpeedRef[0] = 100;
 					BeltMotorSpeedRef[1] = -100;
@@ -275,11 +284,11 @@ void BM_Get_SpeedRef(void)
 				BeltMotorSpeedRef[1] = raise_speed;
 				if(BM_AngelGet == 1)
 				{
-					LBM_Angle = LBeltM_Measure.ecd_angle;
-					RBM_Angle = RBeltM_Measure.ecd_angle;
+					LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
+					RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
 					BM_AngelGet = 0;
 				}
-				if(abs(LBeltM_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+				if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
 				{
 					BeltMotorSpeedRef[0] = 0;
 					BeltMotorSpeedRef[1] = 0;
@@ -345,13 +354,13 @@ void BM_Set_Current(void)
 {
 		if(RC_CtrlData.rc.s2 == 2)
 		{
-			Can_Send_BM(0,0,0,0);
+			CAN2_Send_LM(0,0,0,0);
 		}
 		else
 		{
 		
-			Can_Send_BM(RBMSpeedPID.output*1.5,LBMSpeedPID.output*1.5,0,0);//不要在这里output加负号
-	//		Can_Send_BM(-LBMSpeedPID.output,RBMSpeedPID.output,0,0);//像这样，会有问题，数据类型什么的搞出问题了
+//			CAN2_Send_LM(LCM1SpeedPID.output*1.5,LCM2SpeedPID.output*1.5,0,0);//不要在这里output加负号
+	//		Can_Send_BM(-LCM2SpeedPID.output,LCM1SpeedPID.output,0,0);//像这样，会有问题，数据类型什么的搞出问题了
 		}
 
 
@@ -367,23 +376,6 @@ void Belt_Control(void)
 	BM_Set_Current();
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

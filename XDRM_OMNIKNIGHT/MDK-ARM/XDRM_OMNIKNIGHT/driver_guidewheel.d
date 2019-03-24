@@ -66,3 +66,5 @@ xdrm_omniknight\driver_guidewheel.o: ../Inc/Driver_Sensor.h
 xdrm_omniknight\driver_guidewheel.o: ../Inc/StatusMachine.h
 xdrm_omniknight\driver_guidewheel.o: ../Inc/Driver_Chassis.h
 xdrm_omniknight\driver_guidewheel.o: ../Inc/Driver_Manipulator.h
+xdrm_omniknight\driver_guidewheel.o: ../Inc/CanBusTask.h
+xdrm_omniknight\driver_guidewheel.o: ../Inc/DriverLib_PID.h

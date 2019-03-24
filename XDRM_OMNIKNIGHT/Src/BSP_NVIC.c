@@ -36,10 +36,10 @@ void MX_NVIC_Init(void)
 	
 	HAL_NVIC_SetPriority(USART6_IRQn, 0, 1);
 	HAL_NVIC_EnableIRQ(USART6_IRQn);
-//    HAL_NVIC_SetPriority(CAN2_TX_IRQn, 5, 0);
-//    HAL_NVIC_EnableIRQ(CAN2_TX_IRQn);
-//    HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 5, 0);
-//    HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
+	HAL_NVIC_SetPriority(CAN2_TX_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(CAN2_TX_IRQn);
+	HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
 		
 
 
