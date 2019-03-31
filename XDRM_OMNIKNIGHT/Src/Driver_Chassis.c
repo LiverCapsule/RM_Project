@@ -11,7 +11,7 @@
 #define Ang2Rad(m)  (m/180.0f*M_PI)
 
 ChassisDataTypeDef ChassisData;
-ChassisModeTypeDef ChassisMode;
+ChassisMode_e ChassisMode;
 
 uint8_t Foward_C_flag = 0;
 uint8_t Back_C_flag = 0;
@@ -203,7 +203,7 @@ void CM_Get_SpeedRef(void)
 }
 
 
-void CM_Get_SpeedRef_SM(void)
+void CM_Get_SpeedRef(void)
 {
 	switch (ChassisMode)
 	{
@@ -212,7 +212,7 @@ void CM_Get_SpeedRef_SM(void)
 			ChassisData.ChassisSpeedRef.Y = RC_CtrlData.rc.ch1;
 			ChassisData.ChassisSpeedRef.X = RC_CtrlData.rc.ch0;
 			ChassisData.ChassisSpeedRef.Omega  = RC_CtrlData.rc.ch2/2;
-			ChassisData.ChassisAngle = 0;//GMYawEncoder.ecd_angle;//跟随，这个angle不清楚
+			ChassisData.ChassisAngle = 0;//GMYawEncoder.ecd_angle;
 			
 			static int16_t Y_temp = 0;
 			static int16_t X_temp = 0;
@@ -323,7 +323,7 @@ void CM_Set_Current(void)
 void Chassis_Control(void)
 {
 	CM_Get_PID();
-	CM_Get_SpeedRef_SM();
+	CM_Get_SpeedRef();
 	CM_Calc_Output();
 	CM_Set_Current();
 

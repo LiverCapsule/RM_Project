@@ -63,11 +63,6 @@ xdrm_omniknight\freertos.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\string.h
 xdrm_omniknight\freertos.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdlib.h
 xdrm_omniknight\freertos.o: ../Inc/ControlTask.h
 xdrm_omniknight\freertos.o: ../Inc/StatusMachine.h
-xdrm_omniknight\freertos.o: ../Inc/Driver_Beltraise.h
-xdrm_omniknight\freertos.o: ../Inc/Driver_Chassis.h
-xdrm_omniknight\freertos.o: ../Inc/Driver_GuideWheel.h
-xdrm_omniknight\freertos.o: ../Inc/Driver_Manipulator.h
-xdrm_omniknight\freertos.o: ../Inc/Driver_Remote.h
-xdrm_omniknight\freertos.o: ../Inc/Driver_Sensor.h
 xdrm_omniknight\freertos.o: ../Inc/SuperviseTask.h
 xdrm_omniknight\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+xdrm_omniknight\freertos.o: ../Inc/Data_Stream.h

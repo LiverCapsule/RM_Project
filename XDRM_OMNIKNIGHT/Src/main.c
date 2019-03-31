@@ -115,11 +115,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
 	BSP_Init();
-
-	MotorInit();
   /* USER CODE BEGIN 2 */
-
-	//HAL_UART_Receive_DMA(&huart2,UART2_RXBUFF,18);
 
 	
   /* USER CODE END 2 */

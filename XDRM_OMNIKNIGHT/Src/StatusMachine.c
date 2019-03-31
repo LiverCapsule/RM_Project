@@ -2,37 +2,97 @@
 #include "SuperviseTask.h"
 #include "ControlTask.h"
 
+#include "Driver_Beltraise.h"
+#include "Driver_Chassis.h"
+#include "Driver_GuideWheel.h"
+#include "Driver_Manipulator.h"
+#include "Driver_Remote.h"
+#include "Driver_Sensor.h"
+#include "DriverLib_Ramp.h"
+
+
+
+InputMode_e	InputMode;
+
+
+//需要另一中mode作为最上层，然后state和他并列甚至高于他，作为他的一部分输入和错误检测
+//遥控器数据和帧率检测部分作为state的输入，遥控器和state作为运行模式的输入
 WorkState_e 	WorkState;
 WorkState_e		LastWorkState = STOP_STATE;
-CarMoveModeTypeDef CarMoveMode;
-UpIslandStateTypeDef UpIslandState;
-DownIslandStateTypeDef   DownIslandState;
+OperateMode_e OperateMode;
+Auto_Manual_Act_e Auto_Manual_Act;
+
+//CarMoveModeTypeDef CarMoveMode;
+//UpIslandStateTypeDef UpIslandState;
+//DownIslandStateTypeDef   DownIslandState;
+
+
 uint16_t Up_Island_Flag;
 uint16_t Down_Island_Flag;
 extern uint32_t time_tick_1ms;
 
-static void WorkStateSwitchProcess(void)
-{
-	//如果从其他模式切换到prapare模式，要将一系列参数初始化
-	if((LastWorkState != WorkState) && (WorkState == PREPARE_STATE))  
-	{
-		ControlLoopTaskInit();
-		RemoteTaskInit();
-	}
-}
 
 void SetWorkState(WorkState_e state)
 {
     WorkState = state;
 }
 
-
 WorkState_e GetWorkState(void)
 {
 	return WorkState;
 }
 
-void WorkStateFSM(void)
+
+InputMode_e GetInputMode(void)
+{
+	return InputMode;
+}
+
+
+void InputMode_Switch(void)
+{
+  if(RC_CtrlData.rc.s2 == STICK_UP)
+  {
+    InputMode = REMOTE_INPUT;
+  }
+  if(RC_CtrlData.rc.s2 == STICK_CENTRAL)
+  {
+    InputMode = KEY_MOUSE_INPUT;
+  }
+  if(RC_CtrlData.rc.s2 == STICK_DOWN)
+  {
+    InputMode = STOP;
+  }
+}
+
+
+
+
+
+static void WorkStateSwitchProcess(void)
+{
+	//如果从其他模式切换到prapare模式，要将一系列参数初始化
+	if((LastWorkState != WorkState) && (WorkState == PREPARE_STATE))  
+	{
+		StatusMachine_Init();
+		ControlLoopTaskInit();
+			//斜坡初始化
+//	LRSpeedRamp.SetScale(&LRSpeedRamp, MOUSE_LR_RAMP_TICK_COUNT);
+//	FBSpeedRamp.SetScale(&FBSpeedRamp, MOUSR_FB_RAMP_TICK_COUNT);
+//	LRSpeedRamp.ResetCounter(&LRSpeedRamp);
+//	FBSpeedRamp.ResetCounter(&FBSpeedRamp);
+
+	ChassisData.ChassisSpeedRef.Y = 0.0f;
+	ChassisData.ChassisSpeedRef.X = 0.0f;
+	ChassisData.ChassisSpeedRef.Omega = 0.0f;
+
+	}
+}
+
+
+
+
+void WorkState_Update(void)
 {
   //几种直接换状态的特殊情况
 	LastWorkState = WorkState;
@@ -52,18 +112,18 @@ void WorkStateFSM(void)
         {
          WorkState = NORMAL_RC_STATE;
         }
-        if(InputMode == KEYBOARD_INPUT)
+        if(InputMode == KEY_MOUSE_INPUT)
         {
-          WorkState = KEYBOARD_RC_STATE;
+          WorkState = KEY_MOUSE_STATE;
         }
       }
     }break;
   
     case NORMAL_RC_STATE:
     {
-			if(InputMode == KEYBOARD_INPUT)
+			if(InputMode == KEY_MOUSE_INPUT)
 			{
-				WorkState = KEYBOARD_RC_STATE;
+				WorkState = KEY_MOUSE_STATE;
 			}
       else if(InputMode == STOP)
       {
@@ -71,7 +131,7 @@ void WorkStateFSM(void)
       }
     }break;
 
-    case KEYBOARD_RC_STATE:
+    case KEY_MOUSE_STATE:
     {
       if(InputMode == REMOTE_INPUT)
 			{
@@ -96,82 +156,109 @@ void WorkStateFSM(void)
 
 
 
-void Input_Mode_Select(void)
-{
-  if(RC_CtrlData.rc.s2 == STICK_UP)
-  {
-    InputMode = REMOTE_INPUT;
-  }
-  if(RC_CtrlData.rc.s2 == STICK_CENTRAL)
-  {
-    InputMode = KEYBOARD_INPUT;
-  }
-  if(RC_CtrlData.rc.s2 == STICK_DOWN)
-  {
-    InputMode = STOP;
-  }
-}
-InputMode_e GetInputMode(void)
-{
-	return InputMode;
-}
-
-void Car_Move_State_Select(void)//车总的运动状态选择
+void OperateMode_Select(void)//车总的运动状态选择
 {
   switch (WorkState)
   {
     case PREPARE_STATE:
     {
-      CarMoveMode = Stop_Move_Mode;
+      OperateMode = Stop_Mode;//
     }break;
 
     case NORMAL_RC_STATE:
     {
       if (RC_CtrlData.rc.s1 == STICK_UP) 
       {
-        CarMoveMode = Normal_Move_Mode;
+        OperateMode = Test_Mode;//目前应该没什么意义
       }
       if (RC_CtrlData.rc.s1 == STICK_CENTRAL) 
       {
+				OperateMode = Manual_Mode;
         if(RC_CtrlData.rc.ch3 > 600)
         {
-          Up_Island_Flag = 1;
+					
         }
         else if(RC_CtrlData.rc.ch3 < -600)
-        {
-          Down_Island_Flag = 1;
+				{
+					
         }
-				
-        if(Up_Island_Flag == 1)
-        {
-          CarMoveMode = Auto_Up_Island_Mode;
-					Up_Island_Flag = 0;
-        }
-        else if (Down_Island_Flag == 1) 
-        {
-          CarMoveMode = Auto_Down_Island_Mode;
-					Down_Island_Flag = 0;
-        }
-        
       }
       if (RC_CtrlData.rc.s1 == STICK_DOWN) 
       {
-        CarMoveMode = Auto_Get_Box_Mode;
+				OperateMode = Auto_Mode;//自动模式下底盘工作状态不和常规模式相同
+				if(RC_CtrlData.rc.ch3 > 600)
+        {
+					Auto_Manual_Act = Up_Island;
+        }
+        else if(RC_CtrlData.rc.ch3 < -600)
+				{
+					Auto_Manual_Act = Down_Island;
+        } 
+				else if(RC_CtrlData.rc.ch1 > 600)
+        {
+					Auto_Manual_Act = Fetch_Egg;
+        }
+        else if(RC_CtrlData.rc.ch1 < -600)
+				{
+					Auto_Manual_Act = Fetch_Eggs;
+        }
+				else if(RC_CtrlData.rc.ch2 > 600)
+        {
+					Auto_Manual_Act = Fetch_I_Egg;
+        }
+        else if(RC_CtrlData.rc.ch2 < -600)
+				{
+					Auto_Manual_Act = Fetch_I_Eggs;
+        }
       }
     }break;
-
     case STOP_STATE:
     {
-      CarMoveMode = Stop_Move_Mode;
+      OperateMode = Stop_Mode;
     }break;
+		case KEY_MOUSE_STATE://按哪个键，强制退出任何状态，进入普通模式
+		{
+			//所有的driver
+			//导轮
+			//链条1
+			//链条2
+			//气缸1
+			//气缸2
+			//机械臂电机
+			
+			//用鼠标滚轮做电机输出变化
+			
+			//
+			//手动模式下单独写的东西
+			//1.抬升上岛 右键下W S?
+			//2.
+			
+			
+			if(Remote_CheckJumpKey(KEY_X) == 1)
+			{
+				if(OperateMode == Manual_Mode)
+				{
+					OperateMode = Auto_Mode;
+				}
+				else if(OperateMode == Auto_Mode)
+				{
+					OperateMode = Manual_Mode;
+				}
+			}
+			if(Remote_CheckJumpKey(KEY_CTRL) == 1)
+			{
+			
+			
+			}
 
+		}
     default:
     {
-      CarMoveMode = Stop_Move_Mode;
+      OperateMode = Stop_Mode;
     }break;
   }
 }
-
+/*
 void CarMoveFSM(void)
 {
   switch (CarMoveMode)
@@ -361,10 +448,64 @@ void CarMoveFSM(void)
     }break;
   }
 }
+*/
 
 
-void UpIsland_Init(void)//上下岛都初始化了
+
+
+
+
+
+
+
+void DriversMode_Select(void)
 {
+	switch(OperateMode)
+	{
+		case Stop_Mode:
+		{
+			ChassisMode = Chassis_Locked;
+			LongChainMode = 
+			ShortChainMode = 
+			
+			
+			//all driver_mode
+		
+		
+		}break;
+		case Auto_Mode:
+		{//all situation
+		 //all driver_mode
+			if()
+		
+		
+		}break;
+		case Manual_Mode:
+		{
+			
+		
+		
+		}break;
+		case Test_Mode:
+		{
+			
+		
+		
+		}break;
+		default:
+				
+		break;
+	}
+	
+}
+
+
+
+
+void StatusMachine_Init(void)
+{
+  WorkState = PREPARE_STATE;
+
   ChassisMode = ChassisMove_Stop;
   GuideWheelMode = GuideWheelMove_Stop;
   BeltMode = BeltMove_Stop;
@@ -372,22 +513,17 @@ void UpIsland_Init(void)//上下岛都初始化了
   Down_Island_Flag = 0;
   UpIslandState = Up_Island_Prepare;
   DownIslandState = Down_Island_Prepare;
-}
 
 
-void StatusMachine_Init(void)
-{
-  WorkState = PREPARE_STATE;
-  UpIsland_Init();
 }
 
 
 void StatusMachine_Update(void)
 {
-  Input_Mode_Select();
-  WorkStateFSM();
-  Car_Move_State_Select();
-	CarMoveFSM();
+  InputMode_Switch();
+  WorkState_Update();
+  OperateMode_Select();
+	DriversMode_Select();
 }
 	
 

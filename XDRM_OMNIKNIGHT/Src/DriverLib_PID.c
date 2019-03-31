@@ -107,9 +107,9 @@ void PID_Calc(PID_Regulator_t *pid)
 		pid->output_ki = pid->ki*pid->err[2];//积分部分
 		pid->output_kd = pid->kd*(pid->err[1]-pid->err[0]);	//最后一个是误差微分部分的输出
 		
-		VAL_LIMIT(pid->output_kp,-pid->output_kpMax,pid->output_kpMax);
-		VAL_LIMIT(pid->output_ki,-pid->output_kiMax,pid->output_kiMax);//一般在这项做限制作为抗饱和积分//上下两个加不加以后看
-		VAL_LIMIT(pid->output_kd,-pid->output_kdMax,pid->output_kdMax);
+//		VAL_LIMIT(pid->output_kp,-pid->output_kpMax,pid->output_kpMax);
+//		VAL_LIMIT(pid->output_ki,-pid->output_kiMax,pid->output_kiMax);//一般在这项做限制作为抗饱和积分//上下两个加不加以后看
+//		VAL_LIMIT(pid->output_kd,-pid->output_kdMax,pid->output_kdMax);
 		pid->output = pid->output_kp + pid->output_ki + pid->output_kd;
 	}
 	else if(pid->type == DELTA_PID)

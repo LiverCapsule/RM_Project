@@ -10,11 +10,14 @@
 #include "StatusMachine.h"
 
 uint32_t time_tick_1ms = 0;
-void ControlLoopTaskInit(void)
+
+void ControlLoopInit(void)
 {
 	time_tick_1ms = 0;
-	StatusMachine_Init();
+
 }
+
+
 void ControlTask(void)
 {
 //	static uint32_t tick = 0;这是之前的写法，有一些问题

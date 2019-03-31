@@ -64,6 +64,3 @@ xdrm_omniknight\driver_chassis.o: ../Inc/DriverLib_PID.h
 xdrm_omniknight\driver_chassis.o: ../Inc/Driver_Remote.h
 xdrm_omniknight\driver_chassis.o: ../Inc/Driver_Sensor.h
 xdrm_omniknight\driver_chassis.o: ../Inc/StatusMachine.h
-xdrm_omniknight\driver_chassis.o: ../Inc/Driver_Beltraise.h
-xdrm_omniknight\driver_chassis.o: ../Inc/Driver_GuideWheel.h
-xdrm_omniknight\driver_chassis.o: ../Inc/Driver_Manipulator.h

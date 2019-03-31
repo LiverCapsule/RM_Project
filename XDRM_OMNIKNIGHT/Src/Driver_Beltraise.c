@@ -101,7 +101,6 @@ void Belt_Move_Down(void)
 	}
 }
 
-//现在要想一下整个工程大概怎么写了。
 void BM_Get_PID(void)
 {
 
@@ -359,7 +358,7 @@ void BM_Set_Current(void)
 		else
 		{
 		
-//			CAN2_Send_LM(LCM1SpeedPID.output*1.5,LCM2SpeedPID.output*1.5,0,0);//不要在这里output加负号
+			CAN2_Send_LM(LCM1SpeedPID.output*1.5,LCM2SpeedPID.output*1.5,0,0);//不要在这里output加负号
 	//		Can_Send_BM(-LCM2SpeedPID.output,LCM1SpeedPID.output,0,0);//像这样，会有问题，数据类型什么的搞出问题了
 		}
 

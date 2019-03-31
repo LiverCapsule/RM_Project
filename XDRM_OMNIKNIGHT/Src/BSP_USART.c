@@ -98,7 +98,7 @@ void MX_USART1_UART_Init(void)
 }
 
 
-
+//MiniPC
 void MX_USART2_UART_Init(void)
 {
 

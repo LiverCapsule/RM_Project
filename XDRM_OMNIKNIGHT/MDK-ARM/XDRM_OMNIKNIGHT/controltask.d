@@ -66,4 +66,3 @@ xdrm_omniknight\controltask.o: ../Inc/Driver_Sensor.h
 xdrm_omniknight\controltask.o: ../Inc/Driver_Manipulator.h
 xdrm_omniknight\controltask.o: ../Inc/CanBusTask.h
 xdrm_omniknight\controltask.o: ../Inc/StatusMachine.h
-xdrm_omniknight\controltask.o: ../Inc/Driver_Remote.h

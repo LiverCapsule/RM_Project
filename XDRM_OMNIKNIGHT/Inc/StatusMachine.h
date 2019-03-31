@@ -1,23 +1,22 @@
 #ifndef __STATUSMACHINE_H
 #define __STATUSMACHINE_H
 
-#include "Driver_Beltraise.h"
-#include "Driver_Chassis.h"
-#include "Driver_GuideWheel.h"
-#include "Driver_Manipulator.h"
-#include "Driver_Remote.h"
-#include "Driver_Sensor.h"
 
 #include "config.h"
 
+
 typedef enum
 {
-    Stop_Move_Mode,
-    Normal_Move_Mode,
-    Auto_Up_Island_Mode,
-    Auto_Down_Island_Mode,
-    Auto_Get_Box_Mode
-}CarMoveModeTypeDef;
+	Up_Island,
+	Down_Island,
+	//自动的话自动1箱和三箱，自动岛上、岛下第二排和岛下第一排
+	Fetch_I_Eggs,//岛上及岛下第二排三箱//这两个是否需要有点不同
+	Fetch_I_Egg,//岛上及岛下第二排一箱
+	Fetch_Eggs,//岛下第一排三箱
+	Fetch_Egg,//岛下一箱
+}Auto_Manual_Act_e;
+
+
 
 typedef enum
 {
@@ -49,6 +48,15 @@ typedef enum
     Down_Island_GuideWheelBack_Twice,
     Down_Island_BeltUp_Twice,
 }DownIslandStateTypeDef;
+
+
+
+
+
+
+
+
+
 
 void StatusMachine_Init(void);
 void StatusMachine(void const * argument);

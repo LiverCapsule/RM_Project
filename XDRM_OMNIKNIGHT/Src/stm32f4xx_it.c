@@ -271,19 +271,19 @@ void USART1_IRQHandler(void)
 //4、解码存储buf，清除标志位，开始下一帧接收
 void USART2_IRQHandler(void)
 {
-//	if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE) != RESET)
-//	{
-//		__HAL_UART_CLEAR_IDLEFLAG(&huart2);											
-//		HAL_UART_AbortReceive(&huart2);
-//		uint16_t RX_Length = UART2_RXBUFF_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);//计算数据长度
-//			
-//		//写入队列
-//		for(int i = 0;i<RX_Length;i++)
-//		{
-//			bufferPush(&Que_MiniPC, UART2_RXBUFF[i]);
-//		}
-//	}
-//	HAL_UART_Receive_DMA(&huart2,UART2_RXBUFF,40);
+	if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE) != RESET)
+	{
+		__HAL_UART_CLEAR_IDLEFLAG(&huart2);											
+		HAL_UART_AbortReceive(&huart2);
+		uint16_t RX_Length = UART2_RXBUFF_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);//计算数据长度
+			
+		//写入队列
+		for(int i = 0;i<RX_Length;i++)
+		{
+			bufferPush(&Que_MiniPC, UART2_RXBUFF[i]);
+		}
+	}
+	HAL_UART_Receive_DMA(&huart2,UART2_RXBUFF,40);
 }
 
 void USART6_IRQHandler(void)

@@ -13,6 +13,7 @@
 "xdrm_omniknight\driverlib_func.o"
 "xdrm_omniknight\canbustask.o"
 "xdrm_omniknight\data_judge.o"
+"xdrm_omniknight\data_minipc.o"
 "xdrm_omniknight\stm32f4xx_hal_msp.o"
 "xdrm_omniknight\driver_beltraise.o"
 "xdrm_omniknight\beeptask.o"

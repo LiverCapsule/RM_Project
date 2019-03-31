@@ -7,7 +7,7 @@
 
 #include "DriverLib_PID.h"
 
-
+//机械臂的翻转只需要做角度限制就可以
 
 float ArmMotorAngleRef = 0;
 
@@ -167,6 +167,7 @@ void ARM_Electric_Operate(void)
 
 
 
+
 void Manipulator_Control(void)
 {
 
@@ -174,7 +175,6 @@ void Manipulator_Control(void)
 	ARM_Electric_Operate();
 
 }
-
 
 
 

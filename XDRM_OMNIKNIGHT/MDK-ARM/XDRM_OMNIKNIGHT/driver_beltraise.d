@@ -60,10 +60,7 @@ xdrm_omniknight\driver_beltraise.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\math.h
 xdrm_omniknight\driver_beltraise.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\string.h
 xdrm_omniknight\driver_beltraise.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdlib.h
 xdrm_omniknight\driver_beltraise.o: ../Inc/StatusMachine.h
-xdrm_omniknight\driver_beltraise.o: ../Inc/Driver_Chassis.h
-xdrm_omniknight\driver_beltraise.o: ../Inc/Driver_GuideWheel.h
-xdrm_omniknight\driver_beltraise.o: ../Inc/Driver_Manipulator.h
-xdrm_omniknight\driver_beltraise.o: ../Inc/Driver_Remote.h
-xdrm_omniknight\driver_beltraise.o: ../Inc/Driver_Sensor.h
 xdrm_omniknight\driver_beltraise.o: ../Inc/DriverLib_PID.h
 xdrm_omniknight\driver_beltraise.o: ../Inc/CanBusTask.h
+xdrm_omniknight\driver_beltraise.o: ../Inc/Driver_Remote.h
+xdrm_omniknight\driver_beltraise.o: ../Inc/Driver_Sensor.h

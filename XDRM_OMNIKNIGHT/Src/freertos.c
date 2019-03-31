@@ -57,6 +57,10 @@
 #include "ControlTask.h"
 #include "StatusMachine.h"
 #include "SuperviseTask.h"
+#include "Data_Stream.h"
+
+
+
 //#include "StatusMachine.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -165,8 +169,15 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of Led_Toggle */
-  osThreadDef(Led_Toggle, Led_Toggle_Task, osPriorityLow, 0, 128);
+  osThreadDef(Led_Toggle, Led_Toggle_Task, osPriorityLow, 0, 64);
   Led_ToggleHandle = osThreadCreate(osThread(Led_Toggle), NULL);
+
+
+  osThreadDef(Data_Process, Data_Process_Task, osPriorityLow, 0, 256);//怕can数据量有点大，处理时间什么的，怕他崩掉，就不放进这里了，况且can的帧率要1000，话说这个可以用信号量啊
+  Led_ToggleHandle = osThreadCreate(osThread(Data_Process), NULL);		//到时候再说
+
+
+
 
   /* definition and creation of Can_Send */
   osThreadDef(Can_Send, Can_Send_Task, osPriorityRealtime, 0, 256);
@@ -177,12 +188,12 @@ void MX_FREERTOS_Init(void) {
 
   osThreadDef(Status_Update, StatusMachine, osPriorityRealtime, 0, 256);
   Status_UpdateHandle = osThreadCreate(osThread(Status_Update), NULL);
-
-//  osThreadDef(Status_Update, StatusMachine, osPriorityRealtime, 0, 256);
-//  Task_ControlHandle = osThreadCreate(osThread(Status_Update), NULL);状态机直接写在这里会出现很多重定义的问题，所以先注释掉
 	
-	osThreadDef(Superviese, Superviese_Task, osPriorityRealtime, 0, 256);
-	Superviese_TaskHandle = osThreadCreate(osThread(Superviese),NULL);
+	osThreadDef(Supervise, Superviese_Task, osPriorityRealtime, 0, 256);
+	Superviese_TaskHandle = osThreadCreate(osThread(Supervise),NULL);
+	
+	
+	
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */

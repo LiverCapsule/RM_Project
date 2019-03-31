@@ -22,16 +22,14 @@ typedef struct
 	ChassisSpeed_Ref_TypeDef ChassisSpeedRef;
 }ChassisDataTypeDef;
 
+
 typedef enum
 {
-    Normal_Rc_ChassisMove = 0,
-    Normal_Key_ChassisMove,
-    ChassisMove_Stop,
-		Chassis_Advance,
-		Chassis_Back,
-    Auto_Up_Island_ChassisMove,
-    Auto_Down_Island_ChassisMove
-}ChassisModeTypeDef;
+    Chassis_Locked,
+    Chassis_RC_Normal,
+		Chassis_Key_Normal,
+    Chassis_Auto,
+}ChassisMode_e;
 
 
 
@@ -44,7 +42,7 @@ void CM_Get_PID(void);
 
 
 extern ChassisDataTypeDef ChassisData;
-extern ChassisModeTypeDef ChassisMode;
+extern ChassisMode_e ChassisMode;
 
 
 

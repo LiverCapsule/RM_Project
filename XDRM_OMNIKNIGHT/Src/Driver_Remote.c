@@ -2,9 +2,9 @@
 #include "config.h"
 #include "DriverLib_Ramp.h"
 #include "Driver_Chassis.h"
-#include "StatusMachine.h"
 
-InputMode_e	InputMode;
+
+
 RC_Ctrl RC_CtrlData;
 
 uint8_t stick_store = 0;
@@ -120,33 +120,13 @@ void RemoteDataProcess(uint8_t *pData)
 
     RC_CtrlData.mouse.press_l = pData[12];
     RC_CtrlData.mouse.press_r = pData[13];
- 
-    RC_CtrlData.key.v = ((int16_t)pData[14]) | ((int16_t)pData[15] << 8);
+	
+    RC_CtrlData.key.v = ((int16_t)pData[14]) | ((int16_t)pData[15] << 8);	
+		RC_CtrlData.rc.sw = ((int16_t)pData[16] | ((int16_t)pData[17] << 8)) & 0x07FF;//新固件滚轮
 //		S_switch = stick1_change();
 		stick1_action();
 }
 
-
-
-
-
-
-
-
-
-void RemoteTaskInit(void)
-{
-	//斜坡初始化
-//	LRSpeedRamp.SetScale(&LRSpeedRamp, MOUSE_LR_RAMP_TICK_COUNT);
-//	FBSpeedRamp.SetScale(&FBSpeedRamp, MOUSR_FB_RAMP_TICK_COUNT);
-//	LRSpeedRamp.ResetCounter(&LRSpeedRamp);
-//	FBSpeedRamp.ResetCounter(&FBSpeedRamp);
-
-	ChassisData.ChassisSpeedRef.Y = 0.0f;
-	ChassisData.ChassisSpeedRef.X = 0.0f;
-	ChassisData.ChassisSpeedRef.Omega = 0.0f;
-
-}
 
 
 

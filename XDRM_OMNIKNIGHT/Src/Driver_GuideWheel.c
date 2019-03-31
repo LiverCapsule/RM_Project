@@ -18,7 +18,10 @@ uint8_t Back_GW_flag = 0;
 uint8_t GW_direction;
 uint16_t GW_Speed;
 GuideWheelModeTypeDef GuideWheelMode;
-
+extern uint8_t steps;
+extern uint8_t steps_down;
+extern uint8_t BM_AngelGet;
+/*
 void MotorInit(void)
 {
 	MotorStart();//关闭刹车停机
@@ -71,9 +74,6 @@ void GuideWheel_Move_Back(void)
 	}
 }
 
-extern uint8_t steps;
-extern uint8_t steps_down;
-extern uint8_t BM_AngelGet;
 void MotorSpeedSet(void)
 {
 	if(RC_CtrlData.rc.s2 == 3)
@@ -167,9 +167,13 @@ void MotorSpeedSet_SM(void)
 		}break;
 	}
 }
-
-
+*/
+//在底盘上升到一定高度，也就是电机编码器累加达到某个值，导轮就该转
 uint16_t ref_n = 400;
+
+
+
+
 void GuideWheel_Control(void)
 {
 	//MotorSpeedSet_SM();
