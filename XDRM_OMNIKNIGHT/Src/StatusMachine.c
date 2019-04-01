@@ -17,10 +17,14 @@ InputMode_e	InputMode;
 
 //需要另一中mode作为最上层，然后state和他并列甚至高于他，作为他的一部分输入和错误检测
 //遥控器数据和帧率检测部分作为state的输入，遥控器和state作为运行模式的输入
+
+//自动模式下通过按键切换进行的任务，如取弹，上下岛
+//手动模式下，通过按键改变各个部分的运行状态
+
 WorkState_e 	WorkState;
 WorkState_e		LastWorkState = STOP_STATE;
 OperateMode_e OperateMode;
-Auto_Manual_Act_e Auto_Manual_Act;
+Auto_Move_e Auto_Move;
 
 //CarMoveModeTypeDef CarMoveMode;
 //UpIslandStateTypeDef UpIslandState;
@@ -188,27 +192,27 @@ void OperateMode_Select(void)//车总的运动状态选择
 				OperateMode = Auto_Mode;//自动模式下底盘工作状态不和常规模式相同
 				if(RC_CtrlData.rc.ch3 > 600)
         {
-					Auto_Manual_Act = Up_Island;
+					Auto_Move = Up_Island;
         }
         else if(RC_CtrlData.rc.ch3 < -600)
 				{
-					Auto_Manual_Act = Down_Island;
+					Auto_Move = Down_Island;
         } 
 				else if(RC_CtrlData.rc.ch1 > 600)
         {
-					Auto_Manual_Act = Fetch_Egg;
+					Auto_Move = Fetch_Egg;
         }
         else if(RC_CtrlData.rc.ch1 < -600)
 				{
-					Auto_Manual_Act = Fetch_Eggs;
+					Auto_Move = Fetch_Eggs;
         }
 				else if(RC_CtrlData.rc.ch2 > 600)
         {
-					Auto_Manual_Act = Fetch_I_Egg;
+					Auto_Move = Fetch_I_Egg;
         }
         else if(RC_CtrlData.rc.ch2 < -600)
 				{
-					Auto_Manual_Act = Fetch_I_Eggs;
+					Auto_Move = Fetch_I_Eggs;
         }
       }
     }break;
@@ -218,6 +222,8 @@ void OperateMode_Select(void)//车总的运动状态选择
     }break;
 		case KEY_MOUSE_STATE://按哪个键，强制退出任何状态，进入普通模式
 		{
+			
+			
 			//所有的driver
 			//导轮
 			//链条1
@@ -234,7 +240,7 @@ void OperateMode_Select(void)//车总的运动状态选择
 			//2.
 			
 			
-			if(Remote_CheckJumpKey(KEY_X) == 1)
+			if(Remote_CheckJumpKey(KEY_X) == 1)//按下X切换模式
 			{
 				if(OperateMode == Manual_Mode)
 				{
@@ -464,7 +470,7 @@ void DriversMode_Select(void)
 	{
 		case Stop_Mode:
 		{
-			ChassisMode = Chassis_Locked;
+			ChassisOperateMode = Chassis_Locked;
 			LongChainMode = 
 			ShortChainMode = 
 			
@@ -488,7 +494,7 @@ void DriversMode_Select(void)
 		}break;
 		case Test_Mode:
 		{
-			
+			//先和stop一样
 		
 		
 		}break;

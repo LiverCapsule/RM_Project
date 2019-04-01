@@ -14,7 +14,7 @@ typedef enum
 	Fetch_I_Egg,//岛上及岛下第二排一箱
 	Fetch_Eggs,//岛下第一排三箱
 	Fetch_Egg,//岛下一箱
-}Auto_Manual_Act_e;
+}Auto_Move_e;
 
 
 
