@@ -64,3 +64,9 @@ xdrm_omniknight\driver_chassis.o: ../Inc/DriverLib_PID.h
 xdrm_omniknight\driver_chassis.o: ../Inc/Driver_Remote.h
 xdrm_omniknight\driver_chassis.o: ../Inc/Driver_Sensor.h
 xdrm_omniknight\driver_chassis.o: ../Inc/StatusMachine.h
+xdrm_omniknight\driver_chassis.o: ../Inc/DriverLib_Ramp.h
+xdrm_omniknight\driver_chassis.o: ../Inc/imu.h
+xdrm_omniknight\driver_chassis.o: ../Inc/test_imu.h
+xdrm_omniknight\driver_chassis.o: ../Inc/BSP_SPI.h
+xdrm_omniknight\driver_chassis.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+xdrm_omniknight\driver_chassis.o: ../Inc/Data_MiniPC.h

@@ -237,8 +237,6 @@ void TIM2_IRQHandler(void)
 
 CIRCLE_BUFF_t Que_Protocol = {0, 0, {0}};	//数据缓冲队列
 
-int aaaa = 0;
-
 
 
 
@@ -269,22 +267,26 @@ void USART1_IRQHandler(void)
 //2、一帧数据发送完毕，串口暂时空闲，触发串口空闲中断
 //3、在中断服务函数中，可以计算刚才收到了多少个字节的数据
 //4、解码存储buf，清除标志位，开始下一帧接收
+extern uint8_t PC_Data[8];
 void USART2_IRQHandler(void)
 {
 	if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE) != RESET)
 	{
-		__HAL_UART_CLEAR_IDLEFLAG(&huart2);											
 		HAL_UART_AbortReceive(&huart2);
-		uint16_t RX_Length = UART2_RXBUFF_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);//计算数据长度
-			
+		__HAL_UART_CLEAR_IDLEFLAG(&huart2);											
+//		uint16_t RX_Length = UART2_RXBUFF_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);//计算数据长度
+//			
 		//写入队列
-		for(int i = 0;i<RX_Length;i++)
+		for(int i = 0;i<8;i++)
 		{
-			bufferPush(&Que_MiniPC, UART2_RXBUFF[i]);
+			PC_Data[i] = UART2_RXBUFF[i];
 		}
+		
 	}
-	HAL_UART_Receive_DMA(&huart2,UART2_RXBUFF,40);
+	HAL_UART_Receive_DMA(&huart2,UART2_RXBUFF,8);
 }
+
+
 
 void USART6_IRQHandler(void)
 {
@@ -382,18 +384,40 @@ void EXTI4_IRQHandler(void)
 /**
 * @brief This function handles EXTI line[9:5] interrupts.
 */
+//void EXTI9_5_IRQHandler(void)
+//{
+//  /* USER CODE BEGIN EXTI9_5_IRQn 0 */
+
+//  /* USER CODE END EXTI9_5_IRQn 0 */
+//  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);
+//  /* USER CODE BEGIN EXTI9_5_IRQn 1 */
+//	count2++;
+//  /* USER CODE END EXTI9_5_IRQn 1 */
+//}
+
+#include "test_imu.h"
+#include "imu.h"
+
+
+
+uint16_t EXTI1_IT_count = 0;
+//MPU6500外部中断
 void EXTI9_5_IRQHandler(void)
 {
-  /* USER CODE BEGIN EXTI9_5_IRQn 0 */
-
-  /* USER CODE END EXTI9_5_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);
-  /* USER CODE BEGIN EXTI9_5_IRQn 1 */
-	count2++;
-  /* USER CODE END EXTI9_5_IRQn 1 */
+	EXTI1_IT_count++;
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
 }
+uint32_t SHOOT_COUNT = 0;
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
 
+	if(GPIO_Pin == GPIO_PIN_8)
+	{
+		isMPU6050_is_DRY = 1;   //mpu6050中断标志
+		GetPitchYawGxGyGz();
+	}
+}
 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

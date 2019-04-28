@@ -3,10 +3,7 @@
 
 #include "config.h"
 
-
-
-
-
+#define PREPARE_TIME_TICK_MS 4000
 
 
 

@@ -108,12 +108,17 @@ uint16_t FlipArmMotorFrameCounter = 0;
 
 uint16_t CAN_Send_FrameRate = 0;
 uint16_t CAN_Send_FrameCounter = 0;
+uint16_t CAN_RS_FrameRate = 0;
+uint16_t CAN_RS_FrameCounter = 0;
 
 uint16_t CAN_Res_FrameRate = 0;
 uint16_t CAN_Res_FrameCounter = 0;
 
 uint16_t UART2FrameRate = 0;
 uint16_t UART2FrameCounter = 0;
+
+uint16_t IMUFrameRate = 0;
+uint16_t IMUFrameCounter = 0;
 
 portBASE_TYPE Control_Stack = 1;
 portBASE_TYPE CANSend_Stack = 1;
@@ -154,6 +159,14 @@ void Task_Monitor(void)
             //CAN收发帧率统计
 			CAN_Send_FrameRate = CAN_Send_FrameCounter*2;
 			CAN_Send_FrameCounter = 0;
+
+			IMUFrameRate = IMUFrameCounter*2;
+			IMUFrameCounter = 0;
+
+			CAN_RS_FrameRate = CAN_RS_FrameCounter*2;
+			CAN_RS_FrameCounter = 0;
+
+
 
 			CAN_Res_FrameRate = CAN_Res_FrameCounter*2;
 			CAN_Res_FrameCounter = 0;

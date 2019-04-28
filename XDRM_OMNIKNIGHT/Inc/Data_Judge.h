@@ -184,6 +184,8 @@ typedef struct
 	aerial_robot_energy_t						AirRobotState;//空中机器人能量状态数据，10Hz周期发送，只有空中机器人主控发送
 	ext_robot_hurt_t 										RobotHurt;//伤害状态数据，伤害发生后发送
 	ext_shoot_data_t										ShootData;//实时射击数据，子弹发射后发送
+	//客户端互传数据？
+	
 }Info_Rc_Judge_t;
 
 
@@ -224,6 +226,7 @@ typedef struct
 
 
 
+void Info_Rc_Judge(void);
 
 
 

@@ -62,9 +62,12 @@ xdrm_omniknight\statusmachine.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdlib.h
 xdrm_omniknight\statusmachine.o: ../Inc/SuperviseTask.h
 xdrm_omniknight\statusmachine.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 xdrm_omniknight\statusmachine.o: ../Inc/ControlTask.h
-xdrm_omniknight\statusmachine.o: ../Inc/Driver_Beltraise.h
+xdrm_omniknight\statusmachine.o: ../Inc/Driver_Manipulator.h
 xdrm_omniknight\statusmachine.o: ../Inc/Driver_Chassis.h
 xdrm_omniknight\statusmachine.o: ../Inc/Driver_GuideWheel.h
-xdrm_omniknight\statusmachine.o: ../Inc/Driver_Manipulator.h
 xdrm_omniknight\statusmachine.o: ../Inc/Driver_Remote.h
-xdrm_omniknight\statusmachine.o: ../Inc/Driver_Sensor.h
+xdrm_omniknight\statusmachine.o: ../Inc/Driver_LiftMechanism.h
+xdrm_omniknight\statusmachine.o: ../Inc/imu.h
+xdrm_omniknight\statusmachine.o: ../Inc/test_imu.h
+xdrm_omniknight\statusmachine.o: ../Inc/BSP_SPI.h
+xdrm_omniknight\statusmachine.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h

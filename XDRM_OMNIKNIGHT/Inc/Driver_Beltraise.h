@@ -6,11 +6,11 @@
 
 
 
-#define THRESHOLD   9000
+//#define THRESHOLD   20000//9000
 
 typedef enum
 {
-  Normal_Rc_BeltMove,
+  Normal_RC_BeltMove,
   Normal_Key_BeltMove,
   BeltMove_Stop,
 	Belt_Up,

@@ -71,6 +71,9 @@ extern uint16_t CAN_Res_FrameCounter;
 extern uint16_t UART2FrameRate;
 extern uint16_t UART2FrameCounter;
 
+extern uint16_t IMUFrameRate ;
+extern uint16_t IMUFrameCounter ;
+
 void SuperviseTask(void);
 
 void Set_Error_Flag(uint32_t index);

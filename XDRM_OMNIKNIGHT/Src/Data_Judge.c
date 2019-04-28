@@ -1,7 +1,7 @@
 #include "Data_Judge.h"
 #include "BSP_Data.h"
 
-
+Info_Rc_Judge_t Data_Rc_Judge;
 
 //--------------------------------------------以下由DJI提供--------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------
@@ -155,10 +155,52 @@ void Append_CRC16_Check_Sum(uint8_t * pchMessage,uint32_t dwLength)
 //--------------------------------------------------------------------------------------------------------------------
 
 
-
-void Data_Unpack_Judge(void)
+uint16_t hwei = 0;
+uint16_t lwei = 0;
+uint16_t CmdID = 0;
+void Data_Unpack_Judge(uint8_t* pData)
 {
+	
+    uint16_t data_length = *(uint16_t *)(pData + 1);
+    uint8_t *data_addr = pData + HEADER_LEN + CMD_LEN;
+		lwei = (uint16_t )(*(pData + HEADER_LEN));
+		hwei =(uint16_t ) ((*(pData + HEADER_LEN+1))<<8);
+     CmdID = hwei |lwei;//通俗易懂
+	switch(CmdID)
+	{
+		case GAMESTATE_DATA_ID:
+			memcpy(&Data_Rc_Judge.GameState, data_addr, data_length);
+			break;
 
+		case GAMERESULT_DATA_ID:
+			memcpy(&Data_Rc_Judge.GameResult, data_addr, data_length);
+			break;
+
+		case EVENT_DATA_ID:
+			memcpy(&Data_Rc_Judge.EventData, data_addr, data_length);
+			break;
+
+		case ROBOTHURT_DATA_ID:
+			
+			memcpy(&Data_Rc_Judge.RobotHurt, data_addr, data_length);
+			break;
+
+		case ROBOTSTATE_DATA_ID:
+			memcpy(&Data_Rc_Judge.RobotState, data_addr, data_length);
+			break;
+		case POWER_HEAT_STATE_DATA_ID:
+			memcpy(&Data_Rc_Judge.PowerHeatState, data_addr, data_length);
+			break;
+
+//			case CLIENT_INTER_DATA_ID:
+//			memcpy(&Info_Rc_Judge.RobotState, data_addr, data_length);
+//			break;
+
+		default:
+			{
+			}
+			break;
+    }
 
 
 }
@@ -170,24 +212,23 @@ void Data_Unpack_Judge(void)
 //FrameTail(2-Byte)		两字节CRC16
 
 
-
-void Info_Rc_Judge(void)//先这样，还要再改
+uint8_t frame_temp[JudgeBufferLength];
+void Info_Rc_Judge(void)//
 {
 	//数据多于缓冲区阈值
 	while(bufferlen(&Que_JudgeFrame) > 60)
 	{
-		uint8_t frame_temp[JudgeBufferLength];
 		//寻找帧头	
 		if(bufferPop(&Que_JudgeFrame,frame_temp) == 0xA5)//一边找帧头一边把数据去出，直到遇到帧头，就把有意义的数据读到最终变量中
 		{
             buffer_multiPop(&Que_JudgeFrame, &frame_temp[1], HEADER_LEN - 1);
-            uint8_t data_len = frame_temp[1];
+            uint8_t data_len = frame_temp[1];//这里肯定不会超过
             if (Verify_CRC8_Check_Sum(frame_temp, HEADER_LEN) == 1 && (5 + data_len + CMD_LEN + CRC_LEN) < JudgeBufferLength)
             {
                 buffer_multiPop(&Que_JudgeFrame, &frame_temp[5], data_len + CMD_LEN + CRC_LEN);
                 if (Verify_CRC16_Check_Sum(frame_temp, data_len + HEADER_LEN + CMD_LEN + CRC_LEN) == 1)
                 {
-//					Data_Unpack_Judge(frame_temp);
+					Data_Unpack_Judge(frame_temp);
 				}
 			}
 		}

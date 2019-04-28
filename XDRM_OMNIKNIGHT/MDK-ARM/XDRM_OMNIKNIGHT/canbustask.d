@@ -64,3 +64,5 @@ xdrm_omniknight\canbustask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_R
 xdrm_omniknight\canbustask.o: ../Inc/BSP_CAN.h
 xdrm_omniknight\canbustask.o: ../Inc/BSP_Data.h
 xdrm_omniknight\canbustask.o: ../Inc/DriverLib_PID.h
+xdrm_omniknight\canbustask.o: ../Inc/Data_MiniPC.h
+xdrm_omniknight\canbustask.o: ../Inc/Data_Judge.h

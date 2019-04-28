@@ -41,8 +41,5 @@ void RampSetScale(struct RampGen_t *ramp, int32_t scale);
 						
 extern RampGen_t LRSpeedRamp;
 extern RampGen_t FBSpeedRamp;
-extern RampGen_t MBSpeedRamp;						
-extern RampGen_t GMPitchRamp;
-extern RampGen_t GMYawRamp;
 						
 #endif

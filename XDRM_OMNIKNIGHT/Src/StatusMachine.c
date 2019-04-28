@@ -1,76 +1,49 @@
 #include "StatusMachine.h"
 #include "SuperviseTask.h"
 #include "ControlTask.h"
-
-#include "Driver_Beltraise.h"
+#include "Driver_Manipulator.h"
 #include "Driver_Chassis.h"
 #include "Driver_GuideWheel.h"
-#include "Driver_Manipulator.h"
 #include "Driver_Remote.h"
-#include "Driver_Sensor.h"
-#include "DriverLib_Ramp.h"
+//#include "Driver_Beltraise.h"
+#include "Driver_LiftMechanism.h"
+#include "imu.h"
+
+uint16_t MovementEndFlag = 0;
+
+#define MOV_UPISLAND     1
+#define MOV_DOWNISLAND   2
+#define MOV_FETCH_EGG    3
+#define MOV_FETCH_EGGS   4
+#define MOV_FETCH_I_EGG  5
+#define MOV_FETCH_I_EGGS 6
+#define MOV_PULL_I_EGGS  7
+#define MOV_GIVE_EGG		 8
+//#define MOV_FETCH_EGG 9
+//#define MOV_FETCH_EGG 10
+//#define MOV_FETCH_EGG 11
+
+//届时动作完成将把一定的标志位置一，跳出该动作
+//还有一个按键功能应当是强制停止动作
 
 
 
-InputMode_e	InputMode;
 
-
-//需要另一中mode作为最上层，然后state和他并列甚至高于他，作为他的一部分输入和错误检测
-//遥控器数据和帧率检测部分作为state的输入，遥控器和state作为运行模式的输入
-
-//自动模式下通过按键切换进行的任务，如取弹，上下岛
-//手动模式下，通过按键改变各个部分的运行状态
 
 WorkState_e 	WorkState;
 WorkState_e		LastWorkState = STOP_STATE;
+
 OperateMode_e OperateMode;
-Auto_Move_e Auto_Move;
-
-//CarMoveModeTypeDef CarMoveMode;
-//UpIslandStateTypeDef UpIslandState;
-//DownIslandStateTypeDef   DownIslandState;
-
-
-uint16_t Up_Island_Flag;
-uint16_t Down_Island_Flag;
+AutoMovement_e AutoMovement;
+//UpIslandStateTypeDef 			UpIslandState;
+//DownIslandStateTypeDef  DownIslandState;
 extern uint32_t time_tick_1ms;
 
+extern float CM_SPEED_C;
+extern float CM_OMEGA_C;
 
-void SetWorkState(WorkState_e state)
-{
-    WorkState = state;
-}
-
-WorkState_e GetWorkState(void)
-{
-	return WorkState;
-}
-
-
-InputMode_e GetInputMode(void)
-{
-	return InputMode;
-}
-
-
-void InputMode_Switch(void)
-{
-  if(RC_CtrlData.rc.s2 == STICK_UP)
-  {
-    InputMode = REMOTE_INPUT;
-  }
-  if(RC_CtrlData.rc.s2 == STICK_CENTRAL)
-  {
-    InputMode = KEY_MOUSE_INPUT;
-  }
-  if(RC_CtrlData.rc.s2 == STICK_DOWN)
-  {
-    InputMode = STOP;
-  }
-}
-
-
-
+uint8_t key_b_cnt = 0;
+uint8_t key_b_cnt_last;
 
 
 static void WorkStateSwitchProcess(void)
@@ -78,25 +51,23 @@ static void WorkStateSwitchProcess(void)
 	//如果从其他模式切换到prapare模式，要将一系列参数初始化
 	if((LastWorkState != WorkState) && (WorkState == PREPARE_STATE))  
 	{
-		StatusMachine_Init();
 		ControlLoopTaskInit();
-			//斜坡初始化
-//	LRSpeedRamp.SetScale(&LRSpeedRamp, MOUSE_LR_RAMP_TICK_COUNT);
-//	FBSpeedRamp.SetScale(&FBSpeedRamp, MOUSR_FB_RAMP_TICK_COUNT);
-//	LRSpeedRamp.ResetCounter(&LRSpeedRamp);
-//	FBSpeedRamp.ResetCounter(&FBSpeedRamp);
-
-	ChassisData.ChassisSpeedRef.Y = 0.0f;
-	ChassisData.ChassisSpeedRef.X = 0.0f;
-	ChassisData.ChassisSpeedRef.Omega = 0.0f;
-
+		RemoteTaskInit();
 	}
 }
 
+void SetWorkState(WorkState_e state)
+{
+    WorkState = state;
+}
 
 
+WorkState_e GetWorkState(void)
+{
+	return WorkState;
+}
 
-void WorkState_Update(void)
+void WorkStateUpdate(void)
 {
   //几种直接换状态的特殊情况
 	LastWorkState = WorkState;
@@ -116,18 +87,18 @@ void WorkState_Update(void)
         {
          WorkState = NORMAL_RC_STATE;
         }
-        if(InputMode == KEY_MOUSE_INPUT)
+        if(InputMode == KEYBOARD_INPUT)
         {
-          WorkState = KEY_MOUSE_STATE;
+          WorkState = KEYBOARD_RC_STATE;
         }
       }
     }break;
   
     case NORMAL_RC_STATE:
     {
-			if(InputMode == KEY_MOUSE_INPUT)
+			if(InputMode == KEYBOARD_INPUT)
 			{
-				WorkState = KEY_MOUSE_STATE;
+				WorkState = KEYBOARD_RC_STATE;
 			}
       else if(InputMode == STOP)
       {
@@ -135,7 +106,7 @@ void WorkState_Update(void)
       }
     }break;
 
-    case KEY_MOUSE_STATE:
+    case KEYBOARD_RC_STATE:
     {
       if(InputMode == REMOTE_INPUT)
 			{
@@ -160,376 +131,461 @@ void WorkState_Update(void)
 
 
 
-void OperateMode_Select(void)//车总的运动状态选择
+void InputMode_Select(void)
+{
+  if(RC_CtrlData.rc.s2 == STICK_UP)
+  {
+    InputMode = REMOTE_INPUT;
+  }
+  if(RC_CtrlData.rc.s2 == STICK_CENTRAL)
+  {
+    InputMode = KEYBOARD_INPUT;
+  }
+  if(RC_CtrlData.rc.s2 == STICK_DOWN)
+  {
+    InputMode = STOP;
+  }
+}
+InputMode_e GetInputMode(void)
+{
+	return InputMode;
+}
+extern uint8_t lift_flag_again1;
+extern uint8_t lift_flag_again;
+extern uint8_t arm_move_i;
+void OperateModeSelect(void)//车总的运动状态选择
 {
   switch (WorkState)
   {
     case PREPARE_STATE:
     {
-      OperateMode = Stop_Mode;//
+      OperateMode = Stop_Mode;
     }break;
 
     case NORMAL_RC_STATE:
     {
-      if (RC_CtrlData.rc.s1 == STICK_UP) 
+        OperateMode = NormalRC_Mode;
+				AutoMovement = Auto_NoMovement;
+
+			
+			if(RC_CtrlData.rc.s1 == STICK_UP) //在上减慢速度，通道3控制的是机械臂链条，通道2控制的是机械臂平移电机
       {
-        OperateMode = Test_Mode;//目前应该没什么意义
-      }
-      if (RC_CtrlData.rc.s1 == STICK_CENTRAL) 
+				 OperateMode = NormalRC_Mode;
+				 AutoMovement = Auto_NoMovement;				
+				 CM_SPEED_C = 1.5;
+				 CM_OMEGA_C	= 1;		
+
+
+			}
+			
+			if(RC_CtrlData.rc.s1 == STICK_CENTRAL) //这里的通道可以用绝对值大于600时做自动动作的启动
       {
-				OperateMode = Manual_Mode;
-        if(RC_CtrlData.rc.ch3 > 600)
-        {
-					
-        }
-        else if(RC_CtrlData.rc.ch3 < -600)
-				{
-					
-        }
-      }
+				CM_SPEED_C = 1;
+				CM_OMEGA_C = 0;//此时没有旋转量,此常数为0	
+
+				OperateMode = NormalRC_Mode;
+				AutoMovement = Auto_NoMovement;	
+
+				
+				
+						
+
+			}
       if (RC_CtrlData.rc.s1 == STICK_DOWN) 
       {
-				OperateMode = Auto_Mode;//自动模式下底盘工作状态不和常规模式相同
-				if(RC_CtrlData.rc.ch3 > 600)
-        {
-					Auto_Move = Up_Island;
-        }
-        else if(RC_CtrlData.rc.ch3 < -600)
+				 OperateMode = NormalRC_Mode;
+				 AutoMovement = Auto_NoMovement;	
+				 CM_SPEED_C = 0;
+				 CM_OMEGA_C	= 0;			
+				
+				if(RC_CtrlData.rc.ch0 > 600)
 				{
-					Auto_Move = Down_Island;
-        } 
-				else if(RC_CtrlData.rc.ch1 > 600)
-        {
-					Auto_Move = Fetch_Egg;
-        }
-        else if(RC_CtrlData.rc.ch1 < -600)
+					AutoMovement = Auto_Get_Egg;
+				}
+				else if(RC_CtrlData.rc.ch0 < - 600)
 				{
-					Auto_Move = Fetch_Eggs;
-        }
-				else if(RC_CtrlData.rc.ch2 > 600)
-        {
-					Auto_Move = Fetch_I_Egg;
-        }
-        else if(RC_CtrlData.rc.ch2 < -600)
-				{
-					Auto_Move = Fetch_I_Eggs;
-        }
-      }
+					AutoMovement = Auto_Get_I_Egg;
+				}
+//				
+//				if(RC_CtrlData.rc.ch1 > 600)//这里的通道1,2,3会影响到很多电机的转动,还需要改
+//				{
+//					AutoMovement = Auto_Get_Eggs;
+//				}
+//				else if(RC_CtrlData.rc.ch1 < - 600)
+//				{
+//					AutoMovement = Auto_Get_I_Eggs;
+//				}
+				
+				
+				
+				
+				
+				
+			}
+			
+			
+			
     }break;
+		
     case STOP_STATE:
     {
       OperateMode = Stop_Mode;
-    }break;
-		case KEY_MOUSE_STATE://按哪个键，强制退出任何状态，进入普通模式
-		{
+    }break;	
+    case KEYBOARD_RC_STATE://键盘下机械臂抬升会自己上去,到时候解决
+    {
 			
-			
-			//所有的driver
-			//导轮
-			//链条1
-			//链条2
-			//气缸1
-			//气缸2
-			//机械臂电机
-			
-			//用鼠标滚轮做电机输出变化
-			
-			//
-			//手动模式下单独写的东西
-			//1.抬升上岛 右键下W S?
-			//2.
-			
-			
-			if(Remote_CheckJumpKey(KEY_X) == 1)//按下X切换模式
+			OperateMode = KeyMouse_Mode;
+
+			if(AutoMovement != Auto_NoMovement)//其实这些东西可以考虑加在mode下
 			{
-				if(OperateMode == Manual_Mode)
-				{
-					OperateMode = Auto_Mode;
-				}
-				else if(OperateMode == Auto_Mode)
-				{
-					OperateMode = Manual_Mode;
-				}
+			//不变
 			}
-			if(Remote_CheckJumpKey(KEY_CTRL) == 1)
+			/********以上是保持动作不变**********/
+			else if(Remote_CheckJumpKey(KEY_Z))//通过按键与通道值改变状态
 			{
-			
-			
+				AutoMovement = Auto_Up_Island;
+				arm_move_i = 0;
+			}
+			else if(Remote_CheckJumpKey(KEY_X))
+			{
+				AutoMovement = Auto_Down_Island;
+				arm_move_i = 0;
+
+			}	
+			else if(Remote_CheckJumpKey(KEY_C))//未写完
+			{
+				arm_move_i = 0;
+				AutoMovement = Auto_Up_Step;//上一层
+			}
+			else if(Remote_CheckJumpKey(KEY_E))
+			{
+				arm_move_i = 0;
+
+				AutoMovement = Auto_Get_Egg;
+			}
+			else if(Remote_CheckJumpKey(KEY_Q))
+			{
+					arm_move_i = 0;
+			AutoMovement = Auto_Get_I_Egg;
+			}
+			else if(Remote_CheckJumpKey(KEY_E) && RC_CtrlData.mouse.press_l == 1)
+			{
+				arm_move_i = 0;
+				AutoMovement = Auto_Get_Eggs;
+			}
+			else if(Remote_CheckJumpKey(KEY_Q) && RC_CtrlData.mouse.press_l == 1)
+			{
+				arm_move_i = 0;
+				AutoMovement = Auto_Get_I_Eggs;
+			}
+			else if(Remote_CheckJumpKey(KEY_R))
+			{
+				arm_move_i = 0;
+				AutoMovement = Auto_Cali_For_Egg;
+			}
+			else if(Remote_CheckJumpKey(KEY_G))
+			{
+				arm_move_i = 0;
+				AutoMovement = Auto_Give_Egg;
 			}
 
-		}
+			if(Remote_CheckJumpKey(KEY_B))
+			{
+				arm_move_i = 0;
+				AutoMovement = Auto_NoMovement;
+				lift_flag_again1 =lift_flag_again =0;
+			
+				
+				
+				
+				
+			}
+			
+			
+    }break;
+
     default:
     {
       OperateMode = Stop_Mode;
     }break;
   }
 }
-/*
-void CarMoveFSM(void)
+
+void DriversModeSelect(void)
 {
-  switch (CarMoveMode)
+  switch (OperateMode)
   {
-    case Stop_Move_Mode:
+    case Stop_Mode:
     {
-      BeltMode = BeltMove_Stop;
-      ChassisMode = ChassisMove_Stop;
-      GuideWheelMode = GuideWheelMove_Stop;
+      LiftMechanismMode =		 Lift_Locked;
+      ChassisMode = 			Chassis_Locked;
+      GuideWheelMode = GuideWheel_Locked;
+			Arm_OperateMode  = 			Arm_Locked;
     }break;
   
-    case Normal_Move_Mode:
-    {
-      BeltMode = Normal_Rc_BeltMove;
-      ChassisMode = Normal_Rc_ChassisMove;
-      GuideWheelMode = Normal_Rc_GuideWheelMove;
-    }break;
+    case NormalRC_Mode:
+    {	
+      LiftMechanismMode =		 Lift_NormalRCMode;
+      ChassisMode =				Chassis_NormalRCMode;
+      GuideWheelMode = GuideWheel_NormalRCMode;
+			Arm_OperateMode  = 			Arm_NormalRCMode;
 
-    case Auto_Up_Island_Mode:
-    {
-      switch (UpIslandState)
-      {
-        case Up_Island_Prepare:
-        {
-          UpIslandState = Up_Island_BeltDown_First;
-        }break;
+			//遥控器模式下的自动动作未完成
+			
+			
+			if(AutoMovement != Auto_NoMovement)//如果没有特殊动作，就保持原来的遥控模式
+			{
+				switch (AutoMovement)
+				{
+					case Auto_Get_Eggs:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;//何时进行校准,需要视稳定性改变
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Get_Eggs;
+					
+					}break;
+					case Auto_Get_Egg:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Get_Egg;
+					
+					}break;
+					case Auto_Get_I_Eggs:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Get_I_Eggs;				
+					}break;
+					case Auto_Get_I_Egg:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Get_I_Egg;				
+					}break;
+					case Auto_Pull_Eggs:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Pull_Eggs;				
+					}break;	
+					case Auto_Give_Egg:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_KeyMouseMode;
+						CM_SPEED_C = 0.8;//这个需要注意，应该是没写全的
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Give_Egg;				
+					}break;	
+					case Auto_Up_Island:
+					{
+						LiftMechanismMode =		 Lift_Auto_UpIsland;
+						ChassisMode = Chassis_Auto_UpIsland;
+						GuideWheelMode = GuideWheel_Auto_UpIsland;
+						Arm_OperateMode  = Arm_Locked;				
 
-        case Up_Island_BeltDown_First://皮带下降时把车给撑起来了
-        {
-          BM_AngelGet = 1;
-          BeltMode = Belt_Down;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
+					}break;
+					
+					case Auto_Down_Island:
+					{
+						LiftMechanismMode =		 Lift_Auto_DownIsland;
+						ChassisMode = Chassis_Auto_DownIsland;
+						GuideWheelMode = GuideWheel_Auto_DownIsland;
+						Arm_OperateMode  = Arm_Locked;
+					}break;
+					case Auto_Cali_For_Egg:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Locked;
+					}break;
 
-        case Up_Island_GuideWheelAdvance_First:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheel_Advance;
-        }break;
+			
+					default:
+						//不变
+						break;
+					}
+				}
+				else
+				{
+					
+					//没有动作时,再看拨杆
+						if(RC_CtrlData.rc.s1 == 1)//拨杆1 3 时肯定是只有通道控制的连续值
+						{
+							ChassisMode =				Chassis_NormalRCMode;//此时通道0 1控制底盘前后左右移动 通道2控制旋转
+							LiftMechanismMode =		 Lift_NormalRCMode;//通道3控制抬升链条
+							GuideWheelMode = GuideWheel_NormalRCMode;//通道1也控制导轮//这样方便遥控器手动上岛//这里导轮代码里需要改
+							Arm_OperateMode  = 						Arm_Locked;
+						}
+						else if(RC_CtrlData.rc.s1 == 3)
+						{
+							LiftMechanismMode =	         Lift_Locked;
+							ChassisMode =				Chassis_NormalRCMode;//底盘正常移动,但此时不可转动,通道1同时控制
+							GuideWheelMode =			 GuideWheel_Locked;
+							Arm_OperateMode  = 			Arm_NormalRCMode;//此时通道3作为机械臂抬升,通道2机械臂平移电机
+						}
+						
+						//目前4.24 机械臂和导轮的driver层中遥控器控制函数还需要改动
+						
 				
-        case Up_Island_BeltUp_First:
-        {
-          BM_AngelGet = 1;
-          BeltMode = Belt_Up;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
+						
+						TIM8->CCR1 = 600;//关闭定时器，关弹舱
+						arm_move_i = 0;
+				}
+			
 
-        case Up_Island_ChassisAdvance_First:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = Chassis_Advance;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
+    }break;
+    
+		case KeyMouse_Mode:
+    {
+      LiftMechanismMode =		 Lift_KeyMouseMode;
+      ChassisMode = 			Chassis_KeyMouseMode;
+      GuideWheelMode = GuideWheel_KeyMouseMode;
+			Arm_OperateMode  = 			Arm_KeyMouseMode;
+			
+			if(AutoMovement != Auto_NoMovement)//如果没有特殊动作，就保持原来的键鼠模式
+			{
+				switch (AutoMovement)
+				{
+					case Auto_Get_Eggs:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Get_Eggs;
+					
+					}break;
+					case Auto_Get_Egg:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Get_Egg;
+					
+					}break;
+					case Auto_Get_I_Eggs:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Get_I_Eggs;				
+					}break;
+					case Auto_Get_I_Egg:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Get_I_Egg;				
+					}break;
+					case Auto_Pull_Eggs:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Pull_Eggs;				
+					}break;	
+					case Auto_Give_Egg:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_KeyMouseMode;
+						CM_SPEED_C = 0.8;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Auto_Give_Egg;				
+					}break;	
+					case Auto_Up_Island:
+					{
+						LiftMechanismMode =		 Lift_Auto_UpIsland;
+						ChassisMode = Chassis_Auto_UpIsland;
+						GuideWheelMode = GuideWheel_Auto_UpIsland;
+						Arm_OperateMode  = Arm_Locked;				
 
-        case Up_Island_BeltDown_Twice:
-        {
-          BM_AngelGet = 1;
-          BeltMode = Belt_Down;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
+					}break;
+					
+					case Auto_Down_Island:
+					{
+						LiftMechanismMode =		 Lift_Auto_DownIsland;
+						ChassisMode = Chassis_Auto_DownIsland;
+						GuideWheelMode = GuideWheel_Auto_DownIsland;
+						Arm_OperateMode  = Arm_Locked;
+					}break;
+					case Auto_Cali_For_Egg:
+					{
+						LiftMechanismMode =		 Lift_Locked;
+						ChassisMode = Chassis_Auto_CaliForEgg;
+						GuideWheelMode = GuideWheel_Locked;
+						Arm_OperateMode  = Arm_Locked;
+					}break;
 
-        case Up_Island_GuideWheelAdvance_Twice:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheel_Advance;
-        }break;
+			
+					default:
+						//不变
+						break;
+					}
+				}
+				else
+				{
+					
+						LiftMechanismMode =		 Lift_KeyMouseMode;
+						ChassisMode = Chassis_KeyMouseMode;
+						GuideWheelMode = GuideWheel_KeyMouseMode;
+						Arm_OperateMode  = Arm_KeyMouseMode;///视觉识别时一般需要抬升，所以不锁住
+						
+						TIM8->CCR1 = 600;//关闭定时器，关弹舱
+						arm_move_i = 0;
 				
-        case Up_Island_BeltUp_Twice:
-        {
-          BM_AngelGet = 1;
-          BeltMode = Belt_Up;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-
-        case Up_Island_Stop:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-
-        default:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-      }
-    }break;
-
-    case Auto_Down_Island_Mode:
-    {
-      switch (DownIslandState)
-      {
-        case Down_Island_Prepare:
-        {
-          DownIslandState = Down_Island_ChassisBack_First;
-        }break;
-        
-        case Down_Island_ChassisBack_First:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = Chassis_Back;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-
-        case Down_Island_BeltDown_First:
-        {
-          BM_AngelGet = 1;
-          BeltMode = Belt_Down;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-
-        case Down_Island_GuideWheelBack_First:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheel_Back;
-        }break;
-
-        case Down_Island_BeltUp_First:
-        {
-          BM_AngelGet = 1;
-          BeltMode = Belt_Up;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-
-        case Down_Island_ChassisBack_Twice:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = Chassis_Back;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-
-        case Down_Island_BeltDown_Twice:
-        {
-          BM_AngelGet = 1;
-          BeltMode = Belt_Down;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-
-
-        case Down_Island_GuideWheelBack_Twice:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheel_Back;
-        }break;
-
-        case Down_Island_BeltUp_Twice:
-        {
-          BM_AngelGet = 1;
-          BeltMode = Belt_Up;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-      
-        case Down_Island_stop:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-
-        default:
-        {
-          BeltMode = BeltMove_Stop;
-          ChassisMode = ChassisMove_Stop;
-          GuideWheelMode = GuideWheelMove_Stop;
-        }break;
-      }
-    }break;
-    default:
-    {
-      BeltMode = BeltMove_Stop;
-      ChassisMode = ChassisMove_Stop;
-      GuideWheelMode = GuideWheelMove_Stop;
-    }break;
-  }
+			
+				}
+			}break;
+			case Auto_Mode:
+			{
+			
+			}break;
+			
+			default:
+				{
+					LiftMechanismMode =		 Lift_Locked;
+					ChassisMode = Chassis_Locked;
+					GuideWheelMode = GuideWheel_Locked;
+					Arm_OperateMode  = Arm_Locked;
+				}break;
+			}					
+		
 }
-*/
 
 
 
 
 
-
-
-
-
-void DriversMode_Select(void)
+void UpIsland_Init(void)//上下岛都初始化了
 {
-	switch(OperateMode)
-	{
-		case Stop_Mode:
-		{
-			ChassisOperateMode = Chassis_Locked;
-			LongChainMode = 
-			ShortChainMode = 
-			
-			
-			//all driver_mode
-		
-		
-		}break;
-		case Auto_Mode:
-		{//all situation
-		 //all driver_mode
-			if()
-		
-		
-		}break;
-		case Manual_Mode:
-		{
-			
-		
-		
-		}break;
-		case Test_Mode:
-		{
-			//先和stop一样
-		
-		
-		}break;
-		default:
-				
-		break;
-	}
-	
+  ChassisMode = Chassis_Locked;
+  GuideWheelMode = GuideWheel_Locked;
+	LiftMechanismMode =	Lift_Locked;
 }
-
-
-
 
 void StatusMachine_Init(void)
 {
   WorkState = PREPARE_STATE;
-
-  ChassisMode = ChassisMove_Stop;
-  GuideWheelMode = GuideWheelMove_Stop;
-  BeltMode = BeltMove_Stop;
-  Up_Island_Flag = 0;
-  Down_Island_Flag = 0;
-  UpIslandState = Up_Island_Prepare;
-  DownIslandState = Down_Island_Prepare;
-
+	Arm_OperateMode = Arm_Locked;
+	AutoMovement = Auto_NoMovement;
+  UpIsland_Init();
 
 }
 
 
+
 void StatusMachine_Update(void)
 {
-  InputMode_Switch();
-  WorkState_Update();
-  OperateMode_Select();
-	DriversMode_Select();
+  InputMode_Select();
+  WorkStateUpdate();
+  OperateModeSelect();
+	DriversModeSelect();
 }
 	
 
@@ -544,7 +600,7 @@ void StatusMachine(void const * argument)
 
 			
 			StatusMachine_Update();
-			
+
 			vTaskDelayUntil(&xLastWakeTime,1/portTICK_RATE_MS);//此时处于阻塞态
 		
 		

@@ -5,47 +5,57 @@
 #include "Driver_Remote.h"
 #include "Driver_Sensor.h"
 
-int16_t BeltMotorSpeedRef[2] = {0,0};
-
+#define raise_speed 200
+#define drop_speed  -200
+#define support_speed -100
+int16_t BeltMotorSpeedRef[4] = {0,0,0,0};
 BeltModeTypeDef BeltMode;
+
 int bmkp = 60;
-extern uint8_t S_switch;
-uint16_t raise_speed = 300;
-extern uint8_t Foward_G_flag;
 uint8_t steps = 0;
 uint8_t steps_down = 0;
-uint8_t BM_AngelGet = 0;
+uint8_t BM_AngleGet = 0;
+extern uint8_t S_switch;
+extern uint8_t Foward_G_flag;
 extern uint8_t Foward_C_flag;
 extern uint8_t Back_C_flag;
 extern uint8_t Back_GW_flag;
-extern uint32_t tick_c_1;
 
+
+extern uint8_t GWTimeGet;
 
 
 //总共只需要给一个电机算速度值
 //其他电机只需要取他的相反数或者等值
 
 
-
-
+void BeltMotorSpeedSet(int16_t speed)
+{
+	BeltMotorSpeedRef[0] = speed;
+	BeltMotorSpeedRef[1] = -speed;
+	BeltMotorSpeedRef[2] = speed;
+	BeltMotorSpeedRef[3] = -speed;
+}
 
 void Belt_Move_Up(void)
 {
-	static int32_t LBM_Angle = 0;
-	static int32_t RBM_Angle = 0;
-			
-	BeltMotorSpeedRef[0] = -raise_speed;//250
-	BeltMotorSpeedRef[1] = raise_speed;
-	if(BM_AngelGet == 1)
+	static int32_t LBM1_Angle = 0;
+	static int32_t LBM2_Angle = 0;
+	static int32_t RBM1_Angle = 0;
+	static int32_t RBM2_Angle = 0;
+	
+	BeltMotorSpeedSet(raise_speed);
+	if(BM_AngleGet == 1)
 	{
-		LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
-		RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
-		BM_AngelGet = 0;
+		LBM1_Angle = LiftChain_Motor1_Measure.ecd_angle;
+		RBM1_Angle = LiftChain_Motor2_Measure.ecd_angle;
+		RBM2_Angle = LiftChain_Motor3_Measure.ecd_angle;
+		LBM2_Angle = LiftChain_Motor4_Measure.ecd_angle;
+		BM_AngleGet = 0;
 	}
-	if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+	if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM1_Angle) > THRESHOLD)//9000
 	{
-		BeltMotorSpeedRef[0] = 0;
-		BeltMotorSpeedRef[1] = 0;
+		BeltMotorSpeedSet(0);
 		if(UpIslandState == Up_Island_BeltUp_First) 
 		{
 			UpIslandState = Up_Island_ChassisAdvance_First;
@@ -65,29 +75,38 @@ void Belt_Move_Up(void)
 	}
 }
 
+
+uint16_t aaa = 0;
+int32_t LBM1_Angle = 0;
+
 void Belt_Move_Down(void)
 {
-	static int32_t LBM_Angle = 0;
-	static int32_t RBM_Angle = 0;
-	BeltMotorSpeedRef[0] = raise_speed;//250
-	BeltMotorSpeedRef[1] = -raise_speed;
-	if(BM_AngelGet == 1)
+//	static int32_t LBM2_Angle = 0;
+//	static int32_t RBM1_Angle = 0;
+//	static int32_t RBM2_Angle = 0;
+	
+	BeltMotorSpeedSet(drop_speed);
+	if(BM_AngleGet == 1)
 	{
-		LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
-		RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
-		BM_AngelGet = 0;
+		LBM1_Angle = LiftChain_Motor1_Measure.ecd_angle;
+
+		BM_AngleGet = 0;
 	}
-	if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
+	
+	aaa = abs(LiftChain_Motor1_Measure.ecd_angle - LBM1_Angle);
+	if(aaa > THRESHOLD)//9000
 	{
-		BeltMotorSpeedRef[0] = 100;
-		BeltMotorSpeedRef[1] = -100;
+		BeltMotorSpeedSet(support_speed);
 		if (UpIslandState == Up_Island_BeltDown_First) 
 		{
 			UpIslandState = Up_Island_GuideWheelAdvance_First;
+			GWTimeGet = 1;
 		}
 		else if(UpIslandState == Up_Island_BeltDown_Twice)
 		{
 			UpIslandState = Up_Island_GuideWheelAdvance_Twice;
+			GWTimeGet = 1;
+
 		}
 		else if(DownIslandState == Down_Island_BeltDown_First)
 		{
@@ -101,228 +120,53 @@ void Belt_Move_Down(void)
 	}
 }
 
-void BM_Get_PID(void)
-{
 
-	LCM1SpeedPID.kp = bmkp;//60
-	LCM1SpeedPID.ki = 0;
-	LCM1SpeedPID.kd = 0;//
-	
-	
-	LCM2SpeedPID.kp = bmkp;//60
-	LCM2SpeedPID.ki = 0;
-	LCM2SpeedPID.kd = 0;//
-
-}
 
 
 void 	BM_Calc_Output(void)
 {
-	PID_Task(&LCM2SpeedPID,BeltMotorSpeedRef[0],LiftChain_Motor1_Measure.speed_rpm/10.0);//float /10.0
-	PID_Task(&LCM1SpeedPID,BeltMotorSpeedRef[1],LiftChain_Motor2_Measure.speed_rpm/10.0);
+	PID_Task(&LCM2SpeedPID,BeltMotorSpeedRef[1],LiftChain_Motor2_Measure.speed_rpm/10.0);//float /10.0
+	PID_Task(&LCM1SpeedPID,BeltMotorSpeedRef[0],LiftChain_Motor1_Measure.speed_rpm/10.0);//序号存疑
+	PID_Task(&LCM3SpeedPID,BeltMotorSpeedRef[2],LiftChain_Motor3_Measure.speed_rpm/10.0);//float /10.0
+	PID_Task(&LCM4SpeedPID,BeltMotorSpeedRef[3],LiftChain_Motor4_Measure.speed_rpm/10.0);
 
 	if(LCM2SpeedPID.output>-800 && LCM2SpeedPID.output<800 ) LCM2SpeedPID.output=0;
 	if(LCM1SpeedPID.output>-800 && LCM1SpeedPID.output<800 ) LCM1SpeedPID.output=0;
-
+	if(LCM3SpeedPID.output>-800 && LCM3SpeedPID.output<800 ) LCM3SpeedPID.output=0;
+	if(LCM4SpeedPID.output>-800 && LCM4SpeedPID.output<800 ) LCM4SpeedPID.output=0;
 
 }
-//还要改！
+
+UpIslandStateTypeDef LastUpState = 0;
+DownIslandStateTypeDef LastDownState = 0;
+
 void BM_Get_SpeedRef(void)
-{	
-	if(RC_CtrlData.rc.s2 == 3)//只有在拨杆2为中间值时才能通过拨杆1抬升,拨杆1为3时遥控器控制抬升，1时上岛过程，2时下岛
-	{													//拨杆2为3时,拨杆1用来控制同步带;为1时，用来控制机械臂
-		if(RC_CtrlData.rc.s1 == 3)
-		{
-			BeltMotorSpeedRef[0] = RC_CtrlData.rc.ch3/2;
-			BeltMotorSpeedRef[1] = -RC_CtrlData.rc.ch3/2;
-		}
-		else if(RC_CtrlData.rc.s1 == 1)//或者
-		{	
-			static int32_t LBM_Angle = 0;
-			static int32_t RBM_Angle = 0;
-			if(steps == 0)
-			{
-				BeltMotorSpeedRef[0] = raise_speed;//250
-				BeltMotorSpeedRef[1] = -raise_speed;
-			
-				static uint16_t count = 0;
-				if(S_switch == 1)
-				{
-					count++;
-				}
-				if(count>13)//1000/72
-				{
-					LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
-					RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
-					count = 0;
-				}
-				if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
-				{
-					static int ii = 0;
-					BeltMotorSpeedRef[0] = 100;
-					BeltMotorSpeedRef[1] = -100;//120也行
-					ii++;
-					if(ii == 1)
-					{
-						Foward_G_flag = 1;
-					}
-				}
-			}
-			else if(steps == 1)
-			{
-				BeltMotorSpeedRef[0] = -raise_speed;
-				BeltMotorSpeedRef[1] = raise_speed;
-			static int ii = 0;
-				if(((LiftChain_Motor2_Measure.ecd_angle<(RBM_Angle-1200))&&(LiftChain_Motor1_Measure.ecd_angle>(LBM_Angle+1200)))||(ii >= 1))
-				{	
-					ii++;//这个ii是怕电机卡在临界处,上下抖动//顺便把标志位变化
-					if(ii == 1)
-					{
-						Foward_C_flag = 1;
-						tick_c_1 = xTaskGetTickCount();
-					}
-					BeltMotorSpeedRef[0] = 0;
-					BeltMotorSpeedRef[1] = 0;
-				}
-				
-				
-				if(Foward_C_flag == 0 &&(tick_c_1>2000))//这里感觉是有问题的
-				{
-					BeltMotorSpeedRef[0] = raise_speed;//250
-					BeltMotorSpeedRef[1] = -raise_speed;
-					if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
-					{
-						BeltMotorSpeedRef[0] = 100;
-						BeltMotorSpeedRef[1] = -100;//120也行
-						static int aa =0 ;
-						aa++;
-						if(aa == 1)
-						{
-							Foward_G_flag = 1;
-					
-						}
-					}
-				}
-				}
-				else if(steps == 2)
-				{
-					BeltMotorSpeedRef[0] = -raise_speed;
-					BeltMotorSpeedRef[1] = raise_speed;
-					static int ii = 0;
-					if(((LiftChain_Motor2_Measure.ecd_angle<RBM_Angle)&&(LiftChain_Motor1_Measure.ecd_angle>LBM_Angle))||ii >=1)
-					{
-						ii++;
-						//finish
-						BeltMotorSpeedRef[0] = 0;
-						BeltMotorSpeedRef[1] = 0;
-					}
-				}
-		}
-		else if(RC_CtrlData.rc.s1 == 2)
-		{
-			static int32_t LBM_Angle = 0;
-			static int32_t RBM_Angle = 0;
-			if(steps_down == 0)
-			{
-				Back_C_flag = 1;
-			}
-			else if(steps_down == 1)
-			{
-				BeltMotorSpeedRef[0] = raise_speed;//250
-				BeltMotorSpeedRef[1] = -raise_speed;
-				if(BM_AngelGet == 1)
-				{
-					LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
-					RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
-					BM_AngelGet = 0;
-				}
-				if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
-				{
-					BeltMotorSpeedRef[0] = 100;
-					BeltMotorSpeedRef[1] = -100;
-					Back_GW_flag = 1;
-				}
-			}
-			else if(steps_down == 2)
-			{
-				BeltMotorSpeedRef[0] = -raise_speed;//250
-				BeltMotorSpeedRef[1] = raise_speed;
-				if(BM_AngelGet == 1)
-				{
-					LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
-					RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
-					BM_AngelGet = 0;
-				}
-				if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
-				{
-					BeltMotorSpeedRef[0] = 0;
-					BeltMotorSpeedRef[1] = 0;
-					Back_C_flag = 1;
-				}
-			}
-			else if(steps_down == 3)
-			{
-				BeltMotorSpeedRef[0] = raise_speed;//250
-				BeltMotorSpeedRef[1] = -raise_speed;
-				if(BM_AngelGet == 1)
-				{
-					LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
-					RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
-					BM_AngelGet = 0;
-				}
-				if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
-				{
-					BeltMotorSpeedRef[0] = 100;
-					BeltMotorSpeedRef[1] = -100;
-					Back_GW_flag = 1;
-				}
-			}
-			else if(steps_down == 4)
-			{
-				BeltMotorSpeedRef[0] = -raise_speed;//250
-				BeltMotorSpeedRef[1] = raise_speed;
-				if(BM_AngelGet == 1)
-				{
-					LBM_Angle = LiftChain_Motor1_Measure.ecd_angle;
-					RBM_Angle = LiftChain_Motor2_Measure.ecd_angle;
-					BM_AngelGet = 0;
-				}
-				if(abs(LiftChain_Motor1_Measure.ecd_angle - LBM_Angle) > THRESHOLD)//9000
-				{
-					BeltMotorSpeedRef[0] = 0;
-					BeltMotorSpeedRef[1] = 0;
-	//				Back_C_flag = 1;
-				}
-			}
-	//		steps = 0;
-	//		Foward_G_flag = 0;
-	//		Foward_C_flag = 0;
-	//		BeltMotorSpeedRef[0] = 0;
-	//		BeltMotorSpeedRef[1] = -0;
-		}
-	}
-	else
-	{
-		steps = 0;
-		Foward_G_flag = 0;
-		Foward_C_flag = 0;
-		BeltMotorSpeedRef[0] = 0;
-		BeltMotorSpeedRef[1] = -0;
-	}
-}
-
-
-void BM_Get_SpeedRef_SM(void)
 {
+	LastUpState = UpIslandState;
+	LastDownState = DownIslandState;
+	
 	switch (BeltMode)
 	{
-		case Normal_Rc_BeltMove:
+		case Normal_RC_BeltMove:
 		{
-			BeltMotorSpeedRef[0] = RC_CtrlData.rc.ch3/2;
-			BeltMotorSpeedRef[1] = -RC_CtrlData.rc.ch3/2;
+			BeltMotorSpeedSet(RC_CtrlData.rc.ch3/2);
 		}break;
 	
-		//case Normal_Key_BeltMove{}以后再写
+		case Normal_Key_BeltMove:
+		{
+			if(Remote_CheckJumpKey(KEY_W) == 1 && RC_CtrlData.mouse.press_l == 1)
+			{
+				BeltMotorSpeedSet(200);
+			}
+			else if(Remote_CheckJumpKey(KEY_S) == 1 && RC_CtrlData.mouse.press_l == 1)
+			{
+				BeltMotorSpeedSet(-200);
+			}
+			else
+			{
+				BeltMotorSpeedSet(0);
+			}
+		}break;
 
 		case Belt_Up:
 		{
@@ -336,16 +180,50 @@ void BM_Get_SpeedRef_SM(void)
 
 		case BeltMove_Stop:
 		{
-			BeltMotorSpeedRef[0] = 0;
-			BeltMotorSpeedRef[1] = 0;
+			BeltMotorSpeedSet(0);
 		}break;
 
 		default:
 		{
-			BeltMotorSpeedRef[0] = 0;
-			BeltMotorSpeedRef[1] = 0;
+			BeltMotorSpeedSet(0);
 		}break;
 	}
+	
+	if(UpIslandState!= LastUpState && (UpIslandState == Up_Island_BeltDown_First|| UpIslandState == Up_Island_BeltDown_Twice||UpIslandState == Up_Island_BeltUp_Twice||UpIslandState == Up_Island_BeltUp_First))
+	{
+		BM_AngleGet = 1;
+	}
+	if((DownIslandState!= LastDownState)&&(UpIslandState ==Down_Island_BeltDown_First||UpIslandState ==Down_Island_BeltDown_Twice||UpIslandState ==Down_Island_BeltUp_Twice||UpIslandState ==Down_Island_BeltUp_First))
+	{
+		BM_AngleGet = 1;
+	}
+//	if(UpIslandState!= LastUpState && (UpIslandState == Up_Island_GuideWheelAdvance_First ||UpIslandState == Up_Island_GuideWheelAdvance_Twice ))
+//	{
+//		GWTimeGet = 1;
+//	}
+}
+
+
+void BM_Get_PID(void)
+{
+
+	LCM1SpeedPID.kp = bmkp;//60
+	LCM1SpeedPID.ki = 0;
+	LCM1SpeedPID.kd = 0;//
+	
+	
+	LCM2SpeedPID.kp = bmkp;//60
+	LCM2SpeedPID.ki = 0;
+	LCM2SpeedPID.kd = 0;//
+	
+	LCM3SpeedPID.kp = bmkp;//60
+	LCM3SpeedPID.ki = 0;
+	LCM3SpeedPID.kd = 0;//
+	
+	LCM3SpeedPID.kp = bmkp;//60
+	LCM3SpeedPID.ki = 0;
+	LCM3SpeedPID.kd = 0;//
+
 }
 
 
@@ -357,8 +235,7 @@ void BM_Set_Current(void)
 		}
 		else
 		{
-		
-			CAN2_Send_LM(LCM1SpeedPID.output*1.5,LCM2SpeedPID.output*1.5,0,0);//不要在这里output加负号
+    	CAN2_Send_LM(LCM1SpeedPID.output*1.5,LCM2SpeedPID.output*1.5,LCM3SpeedPID.output*1.5,LCM4SpeedPID.output*1.5);//不要在这里output加负号
 	//		Can_Send_BM(-LCM2SpeedPID.output,LCM1SpeedPID.output,0,0);//像这样，会有问题，数据类型什么的搞出问题了
 		}
 
@@ -370,7 +247,7 @@ void BM_Set_Current(void)
 void Belt_Control(void)
 {
 	BM_Get_PID();
-	BM_Get_SpeedRef_SM();
+	BM_Get_SpeedRef();
 	BM_Calc_Output();
 	BM_Set_Current();
 

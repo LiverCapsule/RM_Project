@@ -8,7 +8,16 @@
 
 
 
-
+//ÏÞ·ùº¯Êý
+#define VAL_LIMIT(val, min, max)\
+if(val<=min)\
+{\
+	val = min;\
+}\
+else if(val>=max)\
+{\
+	val = max;\
+}\
 
 
 #endif

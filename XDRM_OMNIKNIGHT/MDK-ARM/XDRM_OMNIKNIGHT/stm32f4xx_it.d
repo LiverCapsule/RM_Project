@@ -67,3 +67,7 @@ xdrm_omniknight\stm32f4xx_it.o: ../Inc/CanBusTask.h
 xdrm_omniknight\stm32f4xx_it.o: ../Inc/Driver_Remote.h
 xdrm_omniknight\stm32f4xx_it.o: ../Inc/SuperviseTask.h
 xdrm_omniknight\stm32f4xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+xdrm_omniknight\stm32f4xx_it.o: ../Inc/test_imu.h
+xdrm_omniknight\stm32f4xx_it.o: ../Inc/BSP_SPI.h
+xdrm_omniknight\stm32f4xx_it.o: ../Inc/imu.h
+xdrm_omniknight\stm32f4xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h

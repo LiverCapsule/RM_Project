@@ -65,4 +65,3 @@ xdrm_omniknight\freertos.o: ../Inc/ControlTask.h
 xdrm_omniknight\freertos.o: ../Inc/StatusMachine.h
 xdrm_omniknight\freertos.o: ../Inc/SuperviseTask.h
 xdrm_omniknight\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
-xdrm_omniknight\freertos.o: ../Inc/Data_Stream.h

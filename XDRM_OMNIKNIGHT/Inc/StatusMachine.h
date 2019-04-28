@@ -1,20 +1,10 @@
 #ifndef __STATUSMACHINE_H
 #define __STATUSMACHINE_H
 
-
 #include "config.h"
 
 
-typedef enum
-{
-	Up_Island,
-	Down_Island,
-	//自动的话自动1箱和三箱，自动岛上、岛下第二排和岛下第一排
-	Fetch_I_Eggs,//岛上及岛下第二排三箱//这两个是否需要有点不同
-	Fetch_I_Egg,//岛上及岛下第二排一箱
-	Fetch_Eggs,//岛下第一排三箱
-	Fetch_Egg,//岛下一箱
-}Auto_Move_e;
+
 
 
 
@@ -49,24 +39,11 @@ typedef enum
     Down_Island_BeltUp_Twice,
 }DownIslandStateTypeDef;
 
-
-
-
-
-
-
-
-
-
 void StatusMachine_Init(void);
 void StatusMachine(void const * argument);
-extern InputMode_e	InputMode;
-extern GuideWheelModeTypeDef    GuideWheelMode;
-extern BeltModeTypeDef          BeltMode;
-extern ChassisModeTypeDef       ChassisMode;
 extern UpIslandStateTypeDef     UpIslandState;
-extern DownIslandStateTypeDef   DownIslandState;
-extern uint8_t BM_AngelGet;
+//extern DownIslandStateTypeDef   DownIslandState;
+extern uint8_t BM_AngleGet;
 
 #endif
 

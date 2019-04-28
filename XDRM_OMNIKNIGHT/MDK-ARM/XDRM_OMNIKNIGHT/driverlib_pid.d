@@ -59,3 +59,4 @@ xdrm_omniknight\driverlib_pid.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_h
 xdrm_omniknight\driverlib_pid.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\math.h
 xdrm_omniknight\driverlib_pid.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\string.h
 xdrm_omniknight\driverlib_pid.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdlib.h
+xdrm_omniknight\driverlib_pid.o: ../Inc/DriverLib_Func.h

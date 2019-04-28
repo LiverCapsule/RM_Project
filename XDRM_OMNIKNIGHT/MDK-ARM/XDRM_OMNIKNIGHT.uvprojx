@@ -53,7 +53,7 @@
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
           <DebugInformation>1</DebugInformation>
-          <BrowseInformation>1</BrowseInformation>
+          <BrowseInformation>0</BrowseInformation>
           <ListingPath></ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
@@ -405,6 +405,11 @@
               <FilePath>..\Src\SuperviseTask.c</FilePath>
             </File>
             <File>
+              <FileName>BeepTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BeepTask.c</FilePath>
+            </File>
+            <File>
               <FileName>freertos.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/freertos.c</FilePath>
@@ -425,11 +430,6 @@
               <FilePath>..\Src\DriverLib_PID.c</FilePath>
             </File>
             <File>
-              <FileName>DriverLib_Ramp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\DriverLib_Ramp.c</FilePath>
-            </File>
-            <File>
               <FileName>BSP_Data.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSP_Data.c</FilePath>
@@ -438,6 +438,11 @@
               <FileName>DriverLib_Filter.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\DriverLib_Filter.c</FilePath>
+            </File>
+            <File>
+              <FileName>DriverLib_Ramp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\DriverLib_Ramp.c</FilePath>
             </File>
             <File>
               <FileName>DriverLib_Func.c</FileName>
@@ -455,19 +460,14 @@
               <FilePath>..\Src\CanBusTask.c</FilePath>
             </File>
             <File>
-              <FileName>Data_Judge.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\Data_Judge.c</FilePath>
-            </File>
-            <File>
               <FileName>Data_MiniPC.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\Data_MiniPC.c</FilePath>
             </File>
             <File>
-              <FileName>Data_Stream.c</FileName>
+              <FileName>Data_Judge.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\Data_Stream.c</FilePath>
+              <FilePath>..\Src\Data_Judge.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -475,19 +475,9 @@
           <GroupName>Driver/User</GroupName>
           <Files>
             <File>
-              <FileName>stm32f4xx_hal_msp.c</FileName>
+              <FileName>Driver_LiftMechanism.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Src/stm32f4xx_hal_msp.c</FilePath>
-            </File>
-            <File>
-              <FileName>Driver_Beltraise.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\Driver_Beltraise.c</FilePath>
-            </File>
-            <File>
-              <FileName>BeepTask.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BeepTask.c</FilePath>
+              <FilePath>..\Src\Driver_LiftMechanism.c</FilePath>
             </File>
             <File>
               <FileName>Driver_Chassis.c</FileName>
@@ -513,6 +503,11 @@
               <FileName>Driver_Manipulator.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\Driver_Manipulator.c</FilePath>
+            </File>
+            <File>
+              <FileName>Driver_ImageSensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Driver_ImageSensor.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -590,9 +585,24 @@
           <GroupName>Drivers/CMSIS</GroupName>
           <Files>
             <File>
+              <FileName>stm32f4xx_hal_msp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/stm32f4xx_hal_msp.c</FilePath>
+            </File>
+            <File>
               <FileName>system_stm32f4xx.c</FileName>
               <FileType>1</FileType>
               <FilePath>..//Src/system_stm32f4xx.c</FilePath>
+            </File>
+            <File>
+              <FileName>test_imu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\test_imu.c</FilePath>
+            </File>
+            <File>
+              <FileName>imu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\imu.c</FilePath>
             </File>
           </Files>
         </Group>

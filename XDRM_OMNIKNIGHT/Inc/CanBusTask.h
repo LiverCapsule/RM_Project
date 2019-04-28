@@ -5,23 +5,72 @@
 
 #include "Config.h"
 
-/*以下是CAN1总线上的ID，为抓取及基本运动所用电机*/
-#define CAN_BUS1_CHASSISMOTOR1_FEEDBACK_MSG_ID           0x201
-#define CAN_BUS1_CHASSISMOTOR2_FEEDBACK_MSG_ID           0x202
-#define CAN_BUS1_CHASSISMOTOR3_FEEDBACK_MSG_ID           0x203
-#define CAN_BUS1_CHASSISMOTOR4_FEEDBACK_MSG_ID           0x204
-#define CAN_BUS1_LIFTCHAINMOTOR5_FEEDBACK_MSG_ID         0x205//上面的两个链条电机左低右高
-#define CAN_BUS1_LIFTCHAINMOTOR6_FEEDBACK_MSG_ID         0x206
-#define CAN_BUS1_FLIPARMMOTOR_FEEDBACK_MSG_ID						 0x207
-#define CAN_BUS1_MOVEARMMOTOR_FEEDBACK_MSG_ID						 0x208
+///*以下是CAN1总线上的ID，为抓取及基本运动所用电机*/
+//#define CAN_BUS1_CHASSISMOTOR1_FEEDBACK_MSG_ID           0x201
+//#define CAN_BUS1_CHASSISMOTOR2_FEEDBACK_MSG_ID           0x202
+//#define CAN_BUS1_CHASSISMOTOR3_FEEDBACK_MSG_ID           0x203
+//#define CAN_BUS1_CHASSISMOTOR4_FEEDBACK_MSG_ID           0x204
+//#define CAN_BUS1_LIFTCHAINMOTOR5_FEEDBACK_MSG_ID         0x205//上面的两个链条电机左低右高
+//#define CAN_BUS1_LIFTCHAINMOTOR6_FEEDBACK_MSG_ID         0x206
+//#define CAN_BUS1_FLIPARMMOTOR_FEEDBACK_MSG_ID						 0x207
+//#define CAN_BUS1_MOVEARMMOTOR_FEEDBACK_MSG_ID						 0x208
+//				
+///*以下是CAN2总线上的ID，为上岛部分所用电机*/
+//#define CAN_BUS2_LIFTCHAINMOTOR1_FEEDBACK_MSG_ID         0x201//四个链条电机id顺序与麦轮电机相同，从左上角开始顺时针
+//#define CAN_BUS2_LIFTCHAINMOTOR2_FEEDBACK_MSG_ID         0x202
+//#define CAN_BUS2_LIFTCHAINMOTOR3_FEEDBACK_MSG_ID         0x203
+//#define CAN_BUS2_LIFTCHAINMOTOR4_FEEDBACK_MSG_ID         0x204
+
+//#define CAN_BUS2_GUIDEMOTOR1_FEEDBACK_MSG_ID             0x205//左低右高
+//#define CAN_BUS2_GUIDEMOTOR2_FEEDBACK_MSG_ID             0x206
+
+///*以下是CAN1总线上的ID，为抓取及基本运动所用电机*/
+//#define CAN_BUS1_CHASSISMOTOR1_FEEDBACK_MSG_ID           0x201
+//#define CAN_BUS1_CHASSISMOTOR2_FEEDBACK_MSG_ID           0x202
+//#define CAN_BUS1_CHASSISMOTOR3_FEEDBACK_MSG_ID           0x203
+//#define CAN_BUS1_CHASSISMOTOR4_FEEDBACK_MSG_ID           0x204
+//#define CAN_BUS2_LIFTCHAINMOTOR1_FEEDBACK_MSG_ID         0x205//四个链条电机id顺序与麦轮电机相同，从左上角开始顺时针
+//#define CAN_BUS2_LIFTCHAINMOTOR2_FEEDBACK_MSG_ID         0x206
+//#define CAN_BUS2_LIFTCHAINMOTOR3_FEEDBACK_MSG_ID         0x207
+//#define CAN_BUS2_LIFTCHAINMOTOR4_FEEDBACK_MSG_ID         0x208
+
+///*以下是CAN2总线上的ID，为上岛部分所用电机*/
+
+//#define CAN_BUS1_LIFTCHAINMOTOR5_FEEDBACK_MSG_ID         0x201//上面的两个链条电机左低右高
+//#define CAN_BUS1_LIFTCHAINMOTOR6_FEEDBACK_MSG_ID         0x202
+//#define CAN_BUS1_FLIPARMMOTOR_FEEDBACK_MSG_ID						 0x203
+//#define CAN_BUS1_MOVEARMMOTOR_FEEDBACK_MSG_ID						 0x204
+
+
+/*改宏定义中电机名字以及电调id时需要改的东西有：
+	CAN1_Msg_Process
+	CAN1_Send_CM以及类似的几个函数
+	
+*/
+/*以下是CAN2总线上的ID，为底盘和机械臂所用电机*/
+#define CAN_BUS2_CHASSISMOTOR1_FEEDBACK_MSG_ID           0x201
+#define CAN_BUS2_CHASSISMOTOR2_FEEDBACK_MSG_ID           0x202
+#define CAN_BUS2_CHASSISMOTOR3_FEEDBACK_MSG_ID           0x203
+#define CAN_BUS2_CHASSISMOTOR4_FEEDBACK_MSG_ID           0x204
+
+#define CAN_BUS2_LIFTCHAINMOTOR3_FEEDBACK_MSG_ID         0x205//机械臂抬升所用电机，左5右6
+#define CAN_BUS2_LIFTCHAINMOTOR4_FEEDBACK_MSG_ID         0x206
+
+#define CAN_BUS2_FLIPARMMOTOR_FEEDBACK_MSG_ID						 0x207
+#define CAN_BUS2_MOVEARMMOTOR_FEEDBACK_MSG_ID						 0x208
+
+
+/*以下是CAN1总线上的ID，为上岛部分所用电机*/
+
+#define CAN_BUS1_LIFTCHAINMOTOR1_FEEDBACK_MSG_ID         0x201//上岛时抬升所用电机，左1右2
+#define CAN_BUS1_LIFTCHAINMOTOR2_FEEDBACK_MSG_ID         0x202
 				
-/*以下是CAN2总线上的ID，为上岛部分所用电机*/
-#define CAN_BUS2_LIFTCHAINMOTOR1_FEEDBACK_MSG_ID         0x201//四个链条电机id顺序与麦轮电机相同，从左上角开始顺时针
-#define CAN_BUS2_LIFTCHAINMOTOR2_FEEDBACK_MSG_ID         0x202
-#define CAN_BUS2_LIFTCHAINMOTOR3_FEEDBACK_MSG_ID         0x203
-#define CAN_BUS2_LIFTCHAINMOTOR4_FEEDBACK_MSG_ID         0x204
-#define CAN_BUS2_GUIDEMOTOR1_FEEDBACK_MSG_ID             0x205//左低右高
-#define CAN_BUS2_GUIDEMOTOR2_FEEDBACK_MSG_ID             0x206
+#define CAN_BUS1_GUIDEMOTOR1_FEEDBACK_MSG_ID             0x205//左低右高
+#define CAN_BUS1_GUIDEMOTOR2_FEEDBACK_MSG_ID             0x206
+
+
+
+
 
 
 #define CAN_SEND_NUM 3
@@ -36,6 +85,7 @@ typedef struct{
 	uint16_t  lastangle;
 	int32_t   ecd_angle;
 	int16_t   round_cnt;
+	int16_t   initial_angle;
 }Measure;
 
 
@@ -55,10 +105,12 @@ typedef struct{
 }Encoder;
 
 
-void CAN1_Send_CM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
-void CAN1_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
-void CAN2_Send_GM(int16_t iq_1,int16_t iq_2);
+void CAN1_Send_GM(int16_t iq_1,int16_t iq_2);
+void CAN1_Send_LM(int16_t iq_1,int16_t iq_2);//,int16_t iq_3,int16_t iq_4);
+void CAN2_Send_CM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
 void CAN2_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
+
+
 void CAN_Send(void);
 void CAN1_Msg_Process(void);
 void CAN2_Msg_Process(void);
@@ -87,7 +139,7 @@ extern Measure MoveArm_Motor_Measure;
 
 
 
-extern volatile Encoder TurntableEncoder;
+
 #endif
 
 

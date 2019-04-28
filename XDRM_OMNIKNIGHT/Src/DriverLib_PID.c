@@ -3,6 +3,7 @@
 
 #include "DriverLib_PID.h"
 
+#include "DriverLib_Func.h"
 
 
 
@@ -12,6 +13,15 @@ PID_Regulator_t LCM3SpeedPID = LIFTCHAIN_MOTOR_SPEED_PID_DEFAULT;
 PID_Regulator_t LCM4SpeedPID = LIFTCHAIN_MOTOR_SPEED_PID_DEFAULT;
 PID_Regulator_t LCM5SpeedPID = LIFTCHAIN_MOTOR_SPEED_PID_DEFAULT;
 PID_Regulator_t LCM6SpeedPID = LIFTCHAIN_MOTOR_SPEED_PID_DEFAULT;
+
+PID_Regulator_t LCM1PositionPID = LIFTCHAIN_MOTOR_POSITION_PID_DEFAULT;
+PID_Regulator_t LCM2PositionPID = LIFTCHAIN_MOTOR_POSITION_PID_DEFAULT;
+PID_Regulator_t LCM3PositionPID = LIFTCHAIN_MOTOR_POSITION_PID_DEFAULT;
+PID_Regulator_t LCM4PositionPID = LIFTCHAIN_MOTOR_POSITION_PID_DEFAULT;
+PID_Regulator_t LCM5PositionPID = LIFTCHAIN_MOTOR_POSITION_PID_DEFAULT;
+PID_Regulator_t LCM6PositionPID = LIFTCHAIN_MOTOR_POSITION_PID_DEFAULT;
+PID_Regulator_t AMRotatePositionPID = ROTATE_MOTOR_POSITION_PID_DEFAULT; 
+PID_Regulator_t AMMovePositionPID = LIFTCHAIN_MOTOR_POSITION_PID_DEFAULT; 
 
 
 
@@ -24,7 +34,7 @@ PID_Regulator_t AMRotatePID = CHASSIS_MOTOR_SPEED_PID_DEFAULT;
 PID_Regulator_t AMMovePID = CHASSIS_MOTOR_SPEED_PID_DEFAULT; 
 
 
-PID_Regulator_t GM1SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT; //如果can总线掉帧，就把这两个电机做成pwm驱动的
+PID_Regulator_t GM1SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT; //如果can总线掉帧，就把这两个电机做成pwm驱动的，但前提是要买一个烧固件的东西
 PID_Regulator_t GM2SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT; 
 
 
@@ -107,9 +117,9 @@ void PID_Calc(PID_Regulator_t *pid)
 		pid->output_ki = pid->ki*pid->err[2];//积分部分
 		pid->output_kd = pid->kd*(pid->err[1]-pid->err[0]);	//最后一个是误差微分部分的输出
 		
-//		VAL_LIMIT(pid->output_kp,-pid->output_kpMax,pid->output_kpMax);
-//		VAL_LIMIT(pid->output_ki,-pid->output_kiMax,pid->output_kiMax);//一般在这项做限制作为抗饱和积分//上下两个加不加以后看
-//		VAL_LIMIT(pid->output_kd,-pid->output_kdMax,pid->output_kdMax);
+		VAL_LIMIT(pid->output_kp,-pid->output_kpMax,pid->output_kpMax);
+		VAL_LIMIT(pid->output_ki,-pid->output_kiMax,pid->output_kiMax);//一般在这项做限制作为抗饱和积分//上下两个加不加以后看
+		VAL_LIMIT(pid->output_kd,-pid->output_kdMax,pid->output_kdMax);
 		pid->output = pid->output_kp + pid->output_ki + pid->output_kd;
 	}
 	else if(pid->type == DELTA_PID)

@@ -64,7 +64,6 @@ typedef __packed struct
 	int16_t ch1;
 	int16_t ch2;
 	int16_t ch3;
-	int16_t sw;
 }Remote;
 
 
@@ -108,16 +107,24 @@ typedef enum
 }change_e;
 
 
+typedef enum
+{
+	REMOTE_INPUT = 1,
+	KEYBOARD_INPUT = 3,
+	STOP =2,
+}InputMode_e;
+
 
 uint8_t Remote_CheckJumpKey(uint16_t Key);
 void RemoteDataProcess(uint8_t *pdata);
 uint8_t stick1_change(void);
 uint8_t stick1_action(void);
-
+void RemoteTaskInit(void);
 
 
 extern uint8_t Action_stick;
 extern RC_Ctrl RC_CtrlData;
+extern InputMode_e	InputMode;
 
 extern uint8_t stick_store;
 

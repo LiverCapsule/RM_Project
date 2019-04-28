@@ -8,37 +8,9 @@
 #include "Config.h"
 
 
-#define VAL_LIMIT(val, min, max)\
-if(val<=min)\
-{\
-	val = min;\
-}\
-else if(val>=max)\
-{\
-	val = max;\
-}\
 
 
-
-#define YAW_POSITION_KP_DEFAULTS  10
-#define YAW_POSITION_KI_DEFAULTS  0
-#define YAW_POSITION_KD_DEFAULTS  0
-
-#define YAW_SPEED_KP_DEFAULTS  25//  25
-#define YAW_SPEED_KI_DEFAULTS  0
-#define YAW_SPEED_KD_DEFAULTS  0
-
-// avoid bang --->  position:20.0  speed:19.0
-//big bang   22.5 20.0
-#define PITCH_POSITION_KP_DEFAULTS  20.0
-#define PITCH_POSITION_KI_DEFAULTS  0
-#define PITCH_POSITION_KD_DEFAULTS  0
-
-#define PITCH_SPEED_KP_DEFAULTS  7.0	//7
-#define PITCH_SPEED_KI_DEFAULTS  0
-#define PITCH_SPEED_KD_DEFAULTS  0
-
-#define CHASSIS_SPEED_KP_DEFAULTS  50//60
+#define CHASSIS_SPEED_KP_DEFAULTS  15//60
 #define CHASSIS_SPEED_KI_DEFAULTS  0
 #define CHASSIS_SPEED_KD_DEFAULTS  0
 
@@ -46,17 +18,11 @@ else if(val>=max)\
 #define CHASSIS_ROTATE_KI_DEFAULTS  0
 #define CHASSIS_ROTATE_KD_DEFAULTS  0
 
-#define SHOOT_SPEED_KP_DEFAULTS  1.5
-#define SHOOT_SPEED_KI_DEFAULTS  0
-#define SHOOT_SPEED_KD_DEFAULTS  0
 
 
-
-
-
-#define	IMU_POSITION_KP_DEFAULT 2//这个值和定时器的频率有关//牵扯到很多东西
-#define	IMU_POSITION_KI_DEFAULT 0//不可加积分
-#define IMU_POSITION_KD_DEFAULT 0
+#define POSITION_KP_DEFAULTS  10.0
+#define POSITION_KI_DEFAULTS  0
+#define POSITION_KD_DEFAULTS  0
 
 
 enum
@@ -104,16 +70,16 @@ enum
 	0,\
 	0,\
 	0,\
-	4000,\
-	4000,\
-	4000,\
+	8000,\
+	8000,\
+	8000,\
 	0,\
-	4000,\
+	8000,\
 	0,\
 	POSITION_PID,\
 	&PID_Calc,\
 	&PID_Reset,\
-}
+}//底盘电机的输出限制到最大输出的一半
 
 
 
@@ -128,11 +94,11 @@ enum
 	0,\
 	0,\
 	0,\
-	600,\
+	1000,\
 	600,\
 	600,\
 	0,\
-	600,\
+	1000,\
 	0,\
 	POSITION_PID,\
 	&PID_Calc,\
@@ -152,9 +118,9 @@ enum
 	0,\
 	0,\
 	0,\
-	13000,\
-	13000,\
-	13000,\
+	9000,\
+	8000,\
+	8000,\
 	0,\
 	13000,\
 	0,\
@@ -164,6 +130,50 @@ enum
 }
 
 
+#define LIFTCHAIN_MOTOR_POSITION_PID_DEFAULT \
+{\
+	0,\
+	0,\
+	{0,0,0,0},\
+	POSITION_KP_DEFAULTS,\
+	POSITION_KI_DEFAULTS,\
+	POSITION_KD_DEFAULTS,\
+	0,\
+	0,\
+	0,\
+	2000,\
+	800,\
+	800,\
+	0,\
+	1000,\
+	0,\
+	POSITION_PID,\
+	&PID_Calc,\
+	&PID_Reset,\
+}
+
+
+#define ROTATE_MOTOR_POSITION_PID_DEFAULT \
+{\
+	0,\
+	0,\
+	{0,0,0,0},\
+	POSITION_KP_DEFAULTS,\
+	POSITION_KI_DEFAULTS,\
+	POSITION_KD_DEFAULTS,\
+	0,\
+	0,\
+	0,\
+	5000,\
+	800,\
+	800,\
+	0,\
+	1000,\
+	0,\
+	POSITION_PID,\
+	&PID_Calc,\
+	&PID_Reset,\
+}
 
 typedef __packed struct PID_Regulator_t//这个有点奇怪。。是因为下面有函数指针！所以是为什么呢
 {

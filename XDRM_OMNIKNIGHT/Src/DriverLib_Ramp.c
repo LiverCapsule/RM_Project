@@ -5,10 +5,8 @@
 
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   //mouse左右移动斜坡
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;   //mouse前后移动斜坡
-RampGen_t MBSpeedRamp = RAMP_GEN_DAFAULT;   //mouse猫步移动斜坡 
 
-RampGen_t GMPitchRamp = RAMP_GEN_DAFAULT;
-RampGen_t GMYawRamp = RAMP_GEN_DAFAULT;
+
 void RampInit(RampGen_t *ramp, int32_t XSCALE)
 {
 }

@@ -3,25 +3,19 @@
 
 #include "config.h"
 
-#define MotorStart()						HAL_GPIO_WritePin(GPIOE,GPIO_PIN_6|GPIO_PIN_12,GPIO_PIN_SET);
-#define MotorStop()							HAL_GPIO_WritePin(GPIOE,GPIO_PIN_6|GPIO_PIN_12,GPIO_PIN_RESET);
-
 
 typedef enum
 {
-    Normal_Rc_GuideWheelMove = 0,
-    Normal_Key_GuideWheelMove,
-    GuideWheelMove_Stop,
-		GuideWheel_Advance,
-		GuideWheel_Back,
-    Auto_Up_Island_GuideWheelMove,
-    Auto_Down_Island_GuideWheelMove
-}GuideWheelModeTypeDef;
+	GuideWheel_Locked,
+	GuideWheel_NormalRCMode,
+	GuideWheel_KeyMouseMode,
+	GuideWheel_Auto_UpIsland,//上岛时导轮其实就是向前
+	GuideWheel_Auto_DownIsland,//下岛时就是向后
+}GuideWheelMode_e;
 
-void MotorInit(void);
 void MotorSpeedSet(void);
 void GuideWheel_Control(void);
-extern GuideWheelModeTypeDef GuideWheelMode;
+extern GuideWheelMode_e GuideWheelMode;
 	
 void GuideWheel_Move_Advance(void);
 void GuideWheel_Move_Back(void);

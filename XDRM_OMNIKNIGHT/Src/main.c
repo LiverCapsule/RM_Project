@@ -57,6 +57,8 @@
 
 #include "Driver_GuideWheel.h"
 #include "BSP.h"
+#include "imu.h"
+#include "test_imu.h"
 
 /* USER CODE END Includes */
 
@@ -77,13 +79,7 @@ void MX_FREERTOS_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-int8_t g1 = 0;
-	int8_t h1 = 0;
-	int8_t i1 = 0;
-	int8_t j1 = 0;
-	int8_t k1 = 0;
-	int8_t l1 = 0;
-	int8_t m1 = 0;
+
 
 /* USER CODE END 0 */
 
@@ -101,6 +97,7 @@ int main(void)
   /* MCU Configuration----------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+
   HAL_Init();
 
 
@@ -115,8 +112,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
 	BSP_Init();
+
+
   /* USER CODE BEGIN 2 */
 
+//	MPU6500_Init();//陀螺仪传感器初始化
+
+//	IMU_Cali();
 	
   /* USER CODE END 2 */
 
@@ -132,7 +134,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	
 		
 	//分为四种任务，分别是数据接收，数据处理，数据发送，和状态机
 	//1.状态机 2.数据接收处理发送（上位机） 3.主控制线程 4.帧率检测、栈检测线程	

@@ -3,6 +3,10 @@
 #include "BSP_CAN.h"
 #include "BSP_Data.h"
 #include "DriverLib_PID.h"
+#include "Data_MiniPC.h"
+
+
+#include "Data_Judge.h"
 
 volatile Encoder TurntableEncoder = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -25,7 +29,8 @@ Measure Guide_Motor2_Measure = {0,0,0,0,0,0,0};
 Measure FlipArm_Motor_Measure = {0,0,0,0,0,0,0};//7为左右移动机
 Measure	MoveArm_Motor_Measure = {0,0,0,0,0,0,0};
 
-
+//向上3正
+//
 /**
   * @brief  处理编码值,将其转换为连续的角度							//[0][1]机械角度
   * @param  msg电机由CAN回传的信息 v编码器结构体				//[2][3]实际转矩电流测量值
@@ -33,6 +38,7 @@ Measure	MoveArm_Motor_Measure = {0,0,0,0,0,0,0};
   */
 void get_measure(Measure *mea, Can_Msg *msg)//查看C620说明书
 {
+	
 	mea->angle = (uint16_t)(msg->data[0] << 8 | msg->data[1]);
 	mea->speed_rpm = (int16_t)(msg->data[2] << 8 | msg->data[3]);
 	mea->real_current = (int16_t)((msg->data[4] << 8) | (msg->data[5]));
@@ -40,13 +46,13 @@ void get_measure(Measure *mea, Can_Msg *msg)//查看C620说明书
 	
 	if((mea->angle - mea->lastangle) < -6400)
 	{
-		mea->round_cnt--;
+		mea->round_cnt++;
 	}
 	else if((mea->angle - mea->lastangle) > 6400)
 	{
-		mea->round_cnt++;
+		mea->round_cnt--;
 	}
-	mea->ecd_angle = mea->round_cnt *360 + (float)(mea->angle)/8192;
+	mea->ecd_angle = mea->round_cnt *360 + (float)(mea->angle - mea->initial_angle)*360/8192;
 	
 	mea->lastangle = mea->angle;
 }
@@ -54,64 +60,15 @@ void get_measure(Measure *mea, Can_Msg *msg)//查看C620说明书
 
 
 
-void EncoderProcess(volatile Encoder *v, Can_Msg *msg)
-{
-	int i = 0;
-	int32_t temp_sum = 0;
-	v->last_raw_value = v->raw_value;
-	v->raw_value = (msg->data[0] << 8) | msg->data[1];//机械角度
-	v->diff = v->raw_value - v->last_raw_value;
-	if (v->diff < -6400) //两次编码器的反馈值差别太大，表示圈数发生了改变
-	{
-		v->round_cnt++;
-		v->ecd_raw_rate = v->diff + 8192;
-	}
-	else if (v->diff > 6400)
-	{
-		v->round_cnt--;
-		v->ecd_raw_rate = v->diff - 8192;
-	}
-	else
-	{
-		v->ecd_raw_rate = v->diff;
-	}
-	//计算得到连续的编码器输出值
-	v->ecd_value = v->raw_value + v->round_cnt * 8192;
-	//计算得到角度值，范围正负无穷大
-	v->ecd_angle = (float)(v->raw_value - v->ecd_bias) * 360.0f / 8192 + v->round_cnt * 360;
-	v->rate_buf[v->buf_count++] = v->ecd_raw_rate;
-	if (v->buf_count == RATE_BUF_SIZE)
-	{
-		v->buf_count = 0;
-	}	
-	//计算速度平均值
-	for (i = 0; i < RATE_BUF_SIZE; i++)
-	{
-		temp_sum += v->rate_buf[i];
-	}
-	v->filter_rate = (int32_t)(temp_sum / RATE_BUF_SIZE);
-}
-
-
-/**
-  * @needs	处理并发送云台、底盘、拨盘电机电流或电压值，接收并处理电调回传的电机信息，帧率均为1k，并为其他通信留空间
-  * @brief  CAN1、CAN2
-  * @note   CAN总线发送:底盘电机4*M3508 C620电调,发送 data∈(-16384,16384) 0x4000	20A
-  * 				0x200或     云台电机自带电调GM3510,data∈(-29000,29000) 0x7148  				云台电机标识符需用0x1FF,ID5为YAWID6为PITCH 3510ID可以是5/6/7
-	*         0x1FF(各对           			 RM6623,data∈(-5000,5000)   0x1388         
-  *         应四个ID的 	拨盘电机RM2006  C610电调  发送 data∈(-10000,10000) 0x2710  10A
-  * 				电调)1-4 5-8
-	*        
-  *         CAN总线接收:			C610	  	C620 0x200+ID号		GM6623 P 0x206	Y 0x206	  GM3510	0x204+1/2/3																												
-  *         data[0]data[1]  机械角度		机械角度						机械角度										机械角度								0-8191 360°
-	*        	data[2]data[3]	转子转速		转子转速						实际电流		13000						输出转矩
-  *         data[4]data[5]	输出转矩		实际电流						给定电流
-	*         data[6]data[7]						温度
-  * @param  None  朱利豪
-  */
-
 
 uint32_t can_count;
+
+
+
+
+
+
+
 
 
 void CAN1_Msg_Process(void)
@@ -120,60 +77,40 @@ void CAN1_Msg_Process(void)
 	CAN_Res_FrameCounter++;//可能会有点问题，暂时先加到这里
 	switch(CAN1_Receive.rx_header.StdId)
 	{
-			case CAN_BUS1_CHASSISMOTOR1_FEEDBACK_MSG_ID:
+			case CAN_BUS1_LIFTCHAINMOTOR1_FEEDBACK_MSG_ID:
 			{
 				ChassisFrameCounter[0]++;
-
-				get_measure(&Chassis_Motor1_Measure, &CAN1_Receive.msg);
+				if(can_count < 200)
+				{
+					LiftChain_Motor1_Measure.initial_angle = LiftChain_Motor1_Measure.angle;
+  			}
+				get_measure(&LiftChain_Motor1_Measure, &CAN1_Receive.msg);
 
 			}
 			break;
-			case CAN_BUS1_CHASSISMOTOR2_FEEDBACK_MSG_ID:
+			case CAN_BUS1_LIFTCHAINMOTOR2_FEEDBACK_MSG_ID:
 			{
 				ChassisFrameCounter[1]++;
-				get_measure(&Chassis_Motor2_Measure, &CAN1_Receive.msg);
+				if(can_count < 200)
+				{
+					LiftChain_Motor2_Measure.initial_angle = LiftChain_Motor2_Measure.angle;
+				}
+				get_measure(&LiftChain_Motor2_Measure, &CAN1_Receive.msg);
 
 			}
 			break;
-			case CAN_BUS1_CHASSISMOTOR3_FEEDBACK_MSG_ID:
-			{
-				ChassisFrameCounter[2]++;
-				get_measure(&Chassis_Motor3_Measure, &CAN1_Receive.msg);
 
-			}
-			break;
-			case CAN_BUS1_CHASSISMOTOR4_FEEDBACK_MSG_ID:
+			case CAN_BUS1_GUIDEMOTOR1_FEEDBACK_MSG_ID:
 			{
-				ChassisFrameCounter[3]++;
-				get_measure(&Chassis_Motor4_Measure, &CAN1_Receive.msg);
-			}
-			break;
-			case CAN_BUS1_LIFTCHAINMOTOR5_FEEDBACK_MSG_ID:
-			{
-
-				get_measure(&LiftChain_Motor5_Measure, &CAN1_Receive.msg);
+				get_measure(&Guide_Motor1_Measure, &CAN1_Receive.msg);
 
 			}break;
-			case CAN_BUS1_LIFTCHAINMOTOR6_FEEDBACK_MSG_ID://左边轮子为206
+			case CAN_BUS1_GUIDEMOTOR2_FEEDBACK_MSG_ID:
 			{
-				get_measure(&LiftChain_Motor6_Measure, &CAN1_Receive.msg);
+				get_measure(&Guide_Motor2_Measure, &CAN1_Receive.msg);
 
 			}break;
 			
-			case CAN_BUS1_FLIPARMMOTOR_FEEDBACK_MSG_ID:
-			{
-				
-				get_measure(&FlipArm_Motor_Measure,&CAN1_Receive.msg);
-				EncoderProcess(&TurntableEncoder,&CAN1_Receive.msg);
-
-			}break;
-			
-			case CAN_BUS1_MOVEARMMOTOR_FEEDBACK_MSG_ID:
-			{
-				
-				get_measure(&MoveArm_Motor_Measure,&CAN1_Receive.msg);
-				EncoderProcess(&TurntableEncoder,&CAN1_Receive.msg);
-			}break;	
 			default:
 			{
 	
@@ -182,7 +119,7 @@ void CAN1_Msg_Process(void)
 		}
 }
 
-
+extern uint16_t CAN_RS_FrameCounter;
 
 void CAN2_Msg_Process(void)
 {
@@ -190,46 +127,72 @@ void CAN2_Msg_Process(void)
 //	CAN2_Res_FrameCounter++;//可能会有点问题，暂时先加到这里
 	switch(CAN2_Receive.rx_header.StdId)
 	{
-			case CAN_BUS2_LIFTCHAINMOTOR1_FEEDBACK_MSG_ID:
+			case CAN_BUS2_CHASSISMOTOR1_FEEDBACK_MSG_ID:
 			{
-
-				get_measure(&LiftChain_Motor1_Measure, &CAN2_Receive.msg);
+				CAN_RS_FrameCounter++;
+				ChassisFrameCounter[0]++;
+				get_measure(&Chassis_Motor1_Measure, &CAN2_Receive.msg);
 			}
 			break;
-			case CAN_BUS2_LIFTCHAINMOTOR2_FEEDBACK_MSG_ID:
+			case CAN_BUS2_CHASSISMOTOR2_FEEDBACK_MSG_ID:
 			{
 				ChassisFrameCounter[1]++;
-				get_measure(&LiftChain_Motor2_Measure, &CAN2_Receive.msg);
-
+				get_measure(&Chassis_Motor2_Measure, &CAN2_Receive.msg);
 			}
 			break;
-			case CAN_BUS2_LIFTCHAINMOTOR3_FEEDBACK_MSG_ID:
+			case CAN_BUS2_CHASSISMOTOR3_FEEDBACK_MSG_ID:
 			{
 				ChassisFrameCounter[2]++;
-				get_measure(&LiftChain_Motor3_Measure, &CAN2_Receive.msg);
-
+				get_measure(&Chassis_Motor3_Measure, &CAN2_Receive.msg);
 			}
 			break;
-			case CAN_BUS2_LIFTCHAINMOTOR4_FEEDBACK_MSG_ID:
+			case CAN_BUS2_CHASSISMOTOR4_FEEDBACK_MSG_ID:
 			{
 				ChassisFrameCounter[3]++;
-				get_measure(&LiftChain_Motor4_Measure, &CAN2_Receive.msg);
+				get_measure(&Chassis_Motor4_Measure, &CAN2_Receive.msg);
 			}
 			break;
-			case CAN_BUS2_GUIDEMOTOR1_FEEDBACK_MSG_ID:
+			
+			case CAN_BUS2_LIFTCHAINMOTOR3_FEEDBACK_MSG_ID:
 			{
-		//		RbeltFrameCounter++;
-
-				get_measure(&Guide_Motor1_Measure, &CAN2_Receive.msg);
-
-			}break;
-			case CAN_BUS2_GUIDEMOTOR2_FEEDBACK_MSG_ID://左边轮子为206
+				if(can_count < 200)
+				{
+					LiftChain_Motor5_Measure.initial_angle = LiftChain_Motor5_Measure.angle;
+				}
+				get_measure(&LiftChain_Motor5_Measure, &CAN2_Receive.msg);
+			}
+			break;
+			
+			case CAN_BUS2_LIFTCHAINMOTOR4_FEEDBACK_MSG_ID:
 			{
-		//		LbeltFrameCounter++;
+				if(can_count < 200)
+				{
+					LiftChain_Motor6_Measure.initial_angle = LiftChain_Motor6_Measure.angle;
+				}
+				get_measure(&LiftChain_Motor6_Measure, &CAN2_Receive.msg);
+			}
+			break;
+			
+			case CAN_BUS2_FLIPARMMOTOR_FEEDBACK_MSG_ID:
+			{
+				if(can_count < 200)
+				{
+					FlipArm_Motor_Measure.initial_angle = FlipArm_Motor_Measure.angle;
+				}
+				get_measure(&FlipArm_Motor_Measure, &CAN2_Receive.msg);
 
-				get_measure(&Guide_Motor2_Measure, &CAN2_Receive.msg);
-
-			}break;
+			}
+			break;
+			
+			case CAN_BUS2_MOVEARMMOTOR_FEEDBACK_MSG_ID:
+			{
+				if(can_count < 200)
+				{
+					MoveArm_Motor_Measure.initial_angle = MoveArm_Motor_Measure.angle;
+				}
+				get_measure(&MoveArm_Motor_Measure, &CAN2_Receive.msg);
+			}
+			break;
 			default:
 			{
 	
@@ -243,40 +206,22 @@ void CAN2_Msg_Process(void)
 
 
 
-
-
-void CAN1_Send_CM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
+void CAN2_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)//这里机械臂该到了can2的1 2 3 4
 {
-	CAN1_ReadyToSend.tx_header.StdId = 0x200;
-	CAN1_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);
-	CAN1_ReadyToSend.msg.data[1] = (unsigned char)iq_1;
-	CAN1_ReadyToSend.msg.data[2] = (unsigned char)( iq_2 >>8);
-	CAN1_ReadyToSend.msg.data[3] = (unsigned char)iq_2;
-	CAN1_ReadyToSend.msg.data[4] = (unsigned char)( iq_3 >>8);
-	CAN1_ReadyToSend.msg.data[5] = (unsigned char)iq_3;
-	CAN1_ReadyToSend.msg.data[6] = (unsigned char)( iq_4 >>8);
-	CAN1_ReadyToSend.msg.data[7] = (unsigned char)iq_4;
+	CAN2_ReadyToSend.tx_header.StdId = 0x1ff;
+	CAN2_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);
+	CAN2_ReadyToSend.msg.data[1] = (unsigned char)iq_1;
+	CAN2_ReadyToSend.msg.data[2] = (unsigned char)( iq_2 >>8);
+	CAN2_ReadyToSend.msg.data[3] = (unsigned char)iq_2;
+	CAN2_ReadyToSend.msg.data[4] = (unsigned char)( iq_3 >>8);
+	CAN2_ReadyToSend.msg.data[5] = (unsigned char)iq_3;
+	CAN2_ReadyToSend.msg.data[6] = (unsigned char)( iq_4 >>8);
+	CAN2_ReadyToSend.msg.data[7] = (unsigned char)iq_4;
 	
-	CAN_bufferPush(&Que_CAN1_Tx,CAN1_ReadyToSend);
-	
+	CAN_bufferPush(&Que_CAN2_Tx,CAN2_ReadyToSend);
 }
 
-void CAN1_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
-{
-	CAN1_ReadyToSend.tx_header.StdId = 0x1FF;
-	CAN1_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);//上面链条的抬升
-	CAN1_ReadyToSend.msg.data[1] = (unsigned char)iq_1;
-	CAN1_ReadyToSend.msg.data[2] = (unsigned char)( iq_2 >>8);
-	CAN1_ReadyToSend.msg.data[3] = (unsigned char)iq_2;
-	CAN1_ReadyToSend.msg.data[4] = (int16_t)(AMRotatePID.output)>>8;
-	CAN1_ReadyToSend.msg.data[5] = (unsigned char)(AMRotatePID.output);
-	CAN1_ReadyToSend.msg.data[6] = (int16_t)(AMMovePID.output)>>8;
-	CAN1_ReadyToSend.msg.data[7] = (unsigned char)AMMovePID.output;
-	
-	CAN_bufferPush(&Que_CAN1_Tx,CAN1_ReadyToSend);
-}
-
-void CAN2_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
+void CAN2_Send_CM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
 {
 	CAN2_ReadyToSend.tx_header.StdId = 0x200;
 	CAN2_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);
@@ -289,23 +234,36 @@ void CAN2_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4)
 	CAN2_ReadyToSend.msg.data[7] = (unsigned char)iq_4;
 	
 	CAN_bufferPush(&Que_CAN2_Tx,CAN2_ReadyToSend);
+	
+}
+
+void CAN1_Send_LM(int16_t iq_1,int16_t iq_2)//,int16_t iq_3,int16_t iq_4)//这里链条改到了can1的1 2
+{
+	CAN1_ReadyToSend.tx_header.StdId = 0x200;
+	CAN1_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);
+	CAN1_ReadyToSend.msg.data[1] = (unsigned char)iq_1;
+	CAN1_ReadyToSend.msg.data[2] = (unsigned char)( iq_2 >>8);
+	CAN1_ReadyToSend.msg.data[3] = (unsigned char)iq_2;
+//	CAN1_ReadyToSend.msg.data[4] = (unsigned char)( iq_3 >>8);
+//	CAN1_ReadyToSend.msg.data[5] = (unsigned char)iq_3;
+//	CAN1_ReadyToSend.msg.data[6] = (unsigned char)( iq_4 >>8);
+//	CAN1_ReadyToSend.msg.data[7] = (unsigned char)iq_4;
+	
+	CAN_bufferPush(&Que_CAN1_Tx,CAN1_ReadyToSend);
 
 }
 
 
-void CAN2_Send_GM(int16_t iq_1,int16_t iq_2)
+
+void CAN1_Send_GM(int16_t iq_1,int16_t iq_2)
 {
-	CAN2_ReadyToSend.tx_header.StdId = 0x1FF;
-	CAN2_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);
-	CAN2_ReadyToSend.msg.data[1] = (unsigned char)iq_1;
-	CAN2_ReadyToSend.msg.data[2] = (unsigned char)( iq_2 >>8);
-	CAN2_ReadyToSend.msg.data[3] = (unsigned char)iq_2;
-//	CAN2_ReadyToSend.msg.data[4] = 0x00;//先注释着，反正没用，不知道会不会影响帧率，或者不知道会不会出问题
-//	CAN2_ReadyToSend.msg.data[5] = 0x00;
-//	CAN2_ReadyToSend.msg.data[6] = 0x00;
-//	CAN2_ReadyToSend.msg.data[7] = 0x00;
+	CAN1_ReadyToSend.tx_header.StdId = 0x1FF;
+	CAN1_ReadyToSend.msg.data[0] = (unsigned char)( iq_1 >>8);
+	CAN1_ReadyToSend.msg.data[1] = (unsigned char)iq_1;
+	CAN1_ReadyToSend.msg.data[2] = (unsigned char)( iq_2 >>8);
+	CAN1_ReadyToSend.msg.data[3] = (unsigned char)iq_2;
 	
-	CAN_bufferPush(&Que_CAN2_Tx,CAN2_ReadyToSend);
+	CAN_bufferPush(&Que_CAN1_Tx,CAN1_ReadyToSend);
 
 }
 
@@ -325,8 +283,8 @@ uint32_t TxMailFreeNum = 0;
 void Can_Send(void)
 {		
 
-
-
+	//到时候移动，先放着
+	Info_Rc_MiniPC();
 	uint16_t testlen = CAN_bufferlen(&Que_CAN1_Tx);
 	uint16_t testlen2 = CAN_bufferlen(&Que_CAN2_Tx);
 //如果都在一个线程里发的话等发的数据多了就会不够用了
@@ -431,11 +389,12 @@ void Can_Send_Task(void const * argument)
   for(;;)
   {
 
-			
 			Can_Send();
-			
+			Info_Rc_Judge();
+			Info_Rc_MiniPC();//先放在这里
 			vTaskDelayUntil(&xLastWakeTime,1/portTICK_RATE_MS);//此时处于阻塞态
 
+		
   }
   /* USER CODE END Can_Send_Task */
 }

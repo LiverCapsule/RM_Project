@@ -57,7 +57,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "main.h"
-
+	 
+	 
+#define MPU_EXIT_Pin		GPIO_PIN_8
+#define MPU_EXIT_GPIO_Port  GPIOB
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */

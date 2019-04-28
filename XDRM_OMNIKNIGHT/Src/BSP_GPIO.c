@@ -91,7 +91,7 @@ void MX_GPIO_Init(void)
 	
 	HAL_GPIO_WritePin(GPIOH, GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_SET);
 	
-	HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_SET);
+//	HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_SET);
 
   /*Configure GPIO pin : PE11 */
   GPIO_InitStruct.Pin = GPIO_PIN_11;
@@ -115,37 +115,37 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
 
-	//导轮gpio设置
-	/*Configure GPIO pins : PF0 PF1 换向信号线，高电平正向，低电平逆向*/
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+//	//导轮gpio设置//现在导轮电机换成了m2006
+//	/*Configure GPIO pins : PF0 PF1 换向信号线，高电平正向，低电平逆向*/
+//  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+//  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+//  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : PE4 PE5 编码器脉冲接收信号线*/
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+//	/*Configure GPIO pins : PE4 PE5 编码器脉冲接收信号线*/
+//  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
+//  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_6|GPIO_PIN_12, GPIO_PIN_RESET);
+//	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_6|GPIO_PIN_12, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PE6 PE12 电机刹车线，接入0v立刻刹车*/
-  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_12;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+//  /*Configure GPIO pins : PE6 PE12 电机刹车线，接入0v立刻刹车*/
+//  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_12;
+//  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+//  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 	
-	//PC2,PB0两个红外传感器的信号线
+	//PC2,PB0两个红外传感器的信号线//PC2为前
 	 /*Configure GPIO pin : PC2 */
   GPIO_InitStruct.Pin = GPIO_PIN_2;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PB0 */
+  /*Configure GPIO pin : PB0 *///PB0为后
   GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -164,8 +164,19 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 	
-	
-	
+	/*倒车雷达视角切换继电器*/
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		
+		GPIO_InitStruct.Pin = MPU_EXIT_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(MPU_EXIT_GPIO_Port, &GPIO_InitStruct);
+
 }
 
 

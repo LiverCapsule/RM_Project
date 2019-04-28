@@ -1,9 +1,8 @@
 xdrm_omniknight\bsp_spi.o: ..\Src\BSP_SPI.c
-xdrm_omniknight\bsp_spi.o: ../Inc/BSP_SPI.h
+xdrm_omniknight\bsp_spi.o: ../Inc/main.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 xdrm_omniknight\bsp_spi.o: ../Inc/stm32f4xx_hal_conf.h
 xdrm_omniknight\bsp_spi.o: ../Inc/main.h
-xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
@@ -15,6 +14,7 @@ xdrm_omniknight\bsp_spi.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/CMSIS/Include/core_cmFunc.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/CMSIS/Include/core_cmSimd.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
+xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
 xdrm_omniknight\bsp_spi.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdio.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
@@ -40,4 +40,4 @@ xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi
 xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 xdrm_omniknight\bsp_spi.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-xdrm_omniknight\bsp_spi.o: ../Inc/BSP_GPIO.h
+xdrm_omniknight\bsp_spi.o: ../Inc/BSP.h

@@ -62,3 +62,7 @@ xdrm_omniknight\main.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\string.h
 xdrm_omniknight\main.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdlib.h
 xdrm_omniknight\main.o: ../Inc/Driver_GuideWheel.h
 xdrm_omniknight\main.o: ../Inc/BSP.h
+xdrm_omniknight\main.o: ../Inc/imu.h
+xdrm_omniknight\main.o: ../Inc/test_imu.h
+xdrm_omniknight\main.o: ../Inc/BSP_SPI.h
+xdrm_omniknight\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
