@@ -16,6 +16,7 @@ extern PID_Regulator_t LCM3PositionPID;
 extern PID_Regulator_t LCM4PositionPID;
 uint16_t LiftAngleRef = 0;
 extern AutoMovement_e AutoMovement;
+float LM_SPEED_C = 1;
 
 void BeltMotorSpeedSet(int16_t speed)
 {
@@ -70,7 +71,7 @@ void LM_Get_SpeedRef(void)
 		}break;
 		case Lift_NormalRCMode:
 		{
-			BeltMotorSpeedSet(RC_CtrlData.rc.ch3/2);
+			BeltMotorSpeedSet(RC_CtrlData.rc.ch3/2*LM_SPEED_C);
 		}break;
 		case Lift_KeyMouseMode:
 		{

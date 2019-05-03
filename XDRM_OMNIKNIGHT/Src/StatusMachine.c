@@ -42,6 +42,9 @@ extern uint32_t time_tick_1ms;
 extern float CM_SPEED_C;
 extern float CM_OMEGA_C;
 
+extern float LM_SPEED_C;
+extern float AM_SPEED_C;
+
 uint8_t key_b_cnt = 0;
 uint8_t key_b_cnt_last;
 
@@ -174,15 +177,21 @@ void OperateModeSelect(void)//车总的运动状态选择
 				 AutoMovement = Auto_NoMovement;				
 				 CM_SPEED_C = 1.5;
 				 CM_OMEGA_C	= 1;		
-
+				
+				 LM_SPEED_C = 1;//下面两个参数虽然写为1,但是实际上有一部分可能在驱动函数中并未用到,我这样写只是图个方便,懒得去管他
+				 AM_SPEED_C = 1;
 
 			}
 			
-			if(RC_CtrlData.rc.s1 == STICK_CENTRAL) //这里的通道可以用绝对值大于600时做自动动作的启动
+			if(RC_CtrlData.rc.s1 == STICK_CENTRAL) 
       {
 				CM_SPEED_C = 1;
 				CM_OMEGA_C = 0;//此时没有旋转量,此常数为0	
-
+				
+			  LM_SPEED_C = 1;
+				AM_SPEED_C = 1;
+				
+				
 				OperateMode = NormalRC_Mode;
 				AutoMovement = Auto_NoMovement;	
 
@@ -191,12 +200,16 @@ void OperateModeSelect(void)//车总的运动状态选择
 						
 
 			}
-      if (RC_CtrlData.rc.s1 == STICK_DOWN) 
+      if (RC_CtrlData.rc.s1 == STICK_DOWN) //这里的通道可以用绝对值大于600时做自动动作的启动
       {
 				 OperateMode = NormalRC_Mode;
 				 AutoMovement = Auto_NoMovement;	
 				 CM_SPEED_C = 0;
 				 CM_OMEGA_C	= 0;			
+				 LM_SPEED_C = 0;//全为零,除了ch2用作机械臂平移电机外,所有电机速度不受通道直接控制,而由动作命令控制
+				 AM_SPEED_C = 0;
+				
+				
 				
 				if(RC_CtrlData.rc.ch0 > 600)
 				{
@@ -204,17 +217,17 @@ void OperateModeSelect(void)//车总的运动状态选择
 				}
 				else if(RC_CtrlData.rc.ch0 < - 600)
 				{
-					AutoMovement = Auto_Get_I_Egg;
+					AutoMovement = Auto_Get_Eggs;//Auto_Get_I_Egg;
 				}
-//				
-//				if(RC_CtrlData.rc.ch1 > 600)//这里的通道1,2,3会影响到很多电机的转动,还需要改
-//				{
-//					AutoMovement = Auto_Get_Eggs;
-//				}
-//				else if(RC_CtrlData.rc.ch1 < - 600)
-//				{
-//					AutoMovement = Auto_Get_I_Eggs;
-//				}
+				
+				if(RC_CtrlData.rc.ch3 > 600)//这里的通道1,2,3会影响到很多电机的转动,还需要改
+				{
+					AutoMovement = Auto_Get_Eggs;
+				}
+				else if(RC_CtrlData.rc.ch3 < - 600)//通道1 3还有问题
+				{
+					AutoMovement = Auto_Get_I_Eggs;
+				}
 				
 				
 				
@@ -257,13 +270,13 @@ void OperateModeSelect(void)//车总的运动状态选择
 				arm_move_i = 0;
 				AutoMovement = Auto_Up_Step;//上一层
 			}
-			else if(Remote_CheckJumpKey(KEY_E))
+			else if(Remote_CheckJumpKey(KEY_E)&&RC_CtrlData.mouse.press_l ==0)
 			{
 				arm_move_i = 0;
 
 				AutoMovement = Auto_Get_Egg;
 			}
-			else if(Remote_CheckJumpKey(KEY_Q))
+			else if(Remote_CheckJumpKey(KEY_Q)&&RC_CtrlData.mouse.press_l ==0)
 			{
 					arm_move_i = 0;
 			AutoMovement = Auto_Get_I_Egg;
