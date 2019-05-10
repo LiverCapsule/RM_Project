@@ -14,8 +14,8 @@ extern TIM_HandleTypeDef htim8;
 //岛上取弹有足够的时间稳定//2500//这里也改了,未知原因2700//实际机械臂在电机编码器3300位置时达到水平,但是由于惯性会超前转动,所以在这里将目标值改小
 #define ROTATE_H_ANGLE 2300
 
-#define MOVE_ANGLE_R 25000
-#define MOVE_ANGLE_M 14000
+#define MOVE_ANGLE_R 0//25000
+#define MOVE_ANGLE_M 0//现在去了左右自由度14000
 
 
 #define LIFT_ANGLE 6800//左边目标为-值 指抬升到中间
@@ -154,8 +154,13 @@ void Arm_Movement_Split(void)//步骤拆分开
 	
 		case Arm_Auto_Give_Egg:
 		{
+			for(uint8_t move_n = 0;move_n < 40;move_n++)
+			{
+					Arm_Move[move_n] = 0;
+			}
 			ARM_LiftMotorRefAngle = LIFT_ANGLE;
-			TIM8->CCR1 = 1800;
+			TIM8->CCR1 = 1850;
+			
 		}break;
 		
 		case Arm_Locked:
@@ -175,11 +180,11 @@ void Arm_Movement_Split(void)//步骤拆分开
 		}break;
 		case Arm_KeyMouseMode:
 		{//键鼠模式下机械臂平移电机不可手动控制,并且需要在很多地方对机械臂的水平位置进行归位//按B时是否需要不知
-			if(Remote_CheckJumpKey(KEY_A)&& RC_CtrlData.mouse.press_l == 1)
+			if(Remote_CheckJumpKey(KEY_W)&& RC_CtrlData.mouse.press_r == 1)
 			{
 				ARM_LiftMotorRefAngle = LIFT_ANGLE;
 			}
-			else if(Remote_CheckJumpKey(KEY_D)&& RC_CtrlData.mouse.press_l == 1)
+			else if(Remote_CheckJumpKey(KEY_S)&& RC_CtrlData.mouse.press_r == 1)
 			{
 				ARM_LiftMotorRefAngle = 0;
 			}
@@ -320,7 +325,7 @@ void ArmPart_Get_Movement(void)
 			}break;
 			case ARM_ROTATE_I_CMD:
 			{
-					ARM_RotateMotorRefAngle = 0;
+				ARM_RotateMotorRefAngle = 0;
 							
 				if(FlipArm_Motor_Measure.ecd_angle < 300)
 				{

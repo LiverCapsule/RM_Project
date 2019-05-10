@@ -106,7 +106,7 @@ typedef struct{
 
 
 void CAN1_Send_GM(int16_t iq_1,int16_t iq_2);
-void CAN1_Send_LM(int16_t iq_1,int16_t iq_2);//,int16_t iq_3,int16_t iq_4);
+void CAN1_Send_LM(int16_t iq_1,int16_t iq_2);  //,int16_t iq_3,int16_t iq_4);
 void CAN2_Send_CM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
 void CAN2_Send_LM(int16_t iq_1,int16_t iq_2,int16_t iq_3,int16_t iq_4);
 

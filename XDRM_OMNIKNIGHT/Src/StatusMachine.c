@@ -133,7 +133,7 @@ void WorkStateUpdate(void)
 }
 
 
-
+extern float ARM_LiftMotorRefAngle;
 void InputMode_Select(void)
 {
   if(RC_CtrlData.rc.s2 == STICK_UP)
@@ -448,7 +448,7 @@ void DriversModeSelect(void)
 						
 				
 						
-						TIM8->CCR1 = 600;//关闭定时器，关弹舱
+						TIM8->CCR1 = 700;//关闭定时器，关弹舱
 						arm_move_i = 0;
 				}
 			
@@ -549,9 +549,9 @@ void DriversModeSelect(void)
 						GuideWheelMode = GuideWheel_KeyMouseMode;
 						Arm_OperateMode  = Arm_KeyMouseMode;///视觉识别时一般需要抬升，所以不锁住
 						
-						TIM8->CCR1 = 600;//关闭定时器，关弹舱
+						TIM8->CCR1 = 700;//关闭定时器，关弹舱
 						arm_move_i = 0;
-				
+				ARM_LiftMotorRefAngle = 0;
 			
 				}
 			}break;

@@ -17,15 +17,13 @@ int32_t SteerAngleRef = 0;
 
 void SteerAngleSet(void)
 {
-	if(WorkState == STOP_STATE ||WorkState ==  
-		
-	PREPARE_STATE ||OperateMode == Stop_Mode)
+	if(WorkState == STOP_STATE ||WorkState == PREPARE_STATE ||OperateMode == Stop_Mode)
 	{
 		SteerAngleRef = 0;
 	}
 	else if(OperateMode == NormalRC_Mode)
 	{
-//感觉这个没什么意义	
+//		Remote_CheckJumpKey(KEY_C);
 	}
 	else 
 	{
@@ -42,16 +40,16 @@ void SteerAngleSet(void)
 
 void CameraRadar_Switch(void)
 {
-	if(RC_CtrlData.mouse.press_r == 1)//倒车雷达视角右键切换
-	{
-		HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_4);
-	}
+//	if()//倒车雷达视角右键切换
+//	{
+//		HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_4);
+//	}
 }
 
 
 void ImageSensor_Control(void)//这个就基本不写自己单独的模式了，首先他几乎是一直工作的，其次不需要其他的工作模式
 {
-	CameraRadar_Switch();
+//	CameraRadar_Switch();
 	SteerAngleSet();
 
 }

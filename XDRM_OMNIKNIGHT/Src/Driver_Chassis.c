@@ -113,12 +113,17 @@ static void CalculateWheelSpeed(float vx, float vy, float omega, float radian, u
 	}
 	else
 	{
-		s16_WheelSpd[0]   = (int16_t)fWheelSpd[0];
+		s16_WheelSpd[0]   = (int16_t)fWheelSpd[0]; 
 		s16_WheelSpd[1]   = (int16_t)fWheelSpd[1];
 		s16_WheelSpd[2]   = (int16_t)fWheelSpd[2];
 		s16_WheelSpd[3]   = (int16_t)fWheelSpd[3];
 	}
 	memcpy((void*)ChassisData.ChassisWheelSpeedRef, (void*)s16_WheelSpd, 8);
+	
+	
+	
+	
+	
 }
 
 
@@ -132,13 +137,13 @@ void Key2Speed(int16_t FB, int16_t LR)
 	tmp_LR = LR ;
 
 
-	if(Remote_CheckJumpKey(KEY_W) == 1)
-	{
-		ChassisData.ChassisSpeedRef.Y = tmp_FB*FBSpeedRamp.Calc(&FBSpeedRamp);
-	}
-	else if(Remote_CheckJumpKey(KEY_S) == 1)
+	if(Remote_CheckJumpKey(KEY_W) == 1&&RC_CtrlData.mouse.press_r == 0 &&RC_CtrlData.mouse.press_l == 0)
 	{
 		ChassisData.ChassisSpeedRef.Y = -tmp_FB*FBSpeedRamp.Calc(&FBSpeedRamp);
+	}
+	else if(Remote_CheckJumpKey(KEY_S) == 1&&RC_CtrlData.mouse.press_r == 0 &&RC_CtrlData.mouse.press_l == 0)
+	{
+		ChassisData.ChassisSpeedRef.Y = tmp_FB*FBSpeedRamp.Calc(&FBSpeedRamp);
 	}
 	else
 	{
@@ -147,11 +152,11 @@ void Key2Speed(int16_t FB, int16_t LR)
 		ChassisData.ChassisSpeedRef.Y = 0;
 	}
 
-	if(Remote_CheckJumpKey(KEY_D) == 1)
+	if(Remote_CheckJumpKey(KEY_D) == 1&&RC_CtrlData.mouse.press_r == 0 &&RC_CtrlData.mouse.press_l == 0)
 	{
 		ChassisData.ChassisSpeedRef.X = tmp_LR*LRSpeedRamp.Calc(&LRSpeedRamp);
 	}
-	else if(Remote_CheckJumpKey(KEY_A) == 1)
+	else if(Remote_CheckJumpKey(KEY_A) == 1&&RC_CtrlData.mouse.press_r == 0 &&RC_CtrlData.mouse.press_l == 0)
 	{
 		ChassisData.ChassisSpeedRef.X = -tmp_LR*LRSpeedRamp.Calc(&LRSpeedRamp);
 	}
@@ -232,7 +237,7 @@ void CM_Get_SpeedRef(void)
 
 
 	}
-	else if(ChassisMode == Chassis_KeyMouseMode && RC_CtrlData.mouse.press_l == 0)
+	else if(ChassisMode == Chassis_KeyMouseMode)
 	{
 		
 		Key2Speed(NORMAL_FORWARD_BACK_SPEED, NORMAL_LEFT_RIGHT_SPEED);
@@ -268,7 +273,7 @@ void CM_Get_SpeedRef(void)
 	{
 //		//底盘和导轮一起往前走
 		
-		if(InfraredState_back&& angle_average >12000)//后面红外检测到并且抬升机构一部分在下面时
+		if(InfraredState_back&& angle_average >11000)//后面红外检测到并且抬升机构一部分在下面时
 		{
 			
 			angle_save = pitch_angle;//保存上岛时陀螺仪的角度，下岛时自动归回
@@ -277,7 +282,7 @@ void CM_Get_SpeedRef(void)
 
 		if(flag_gcm == 1)//这个时间阈值指从后边红外读到电平后开始计时一段时间
 		{								 //底盘到时候也用距离做
-				ChassisData.ChassisSpeedRef.Y = 200;//
+				ChassisData.ChassisSpeedRef.Y = -200;//
 				ChassisData.ChassisSpeedRef.X = 0;
 		}
 		
@@ -300,14 +305,22 @@ void CM_Get_SpeedRef(void)
 			
 			if(flag_gcm == -1)
 			{
-				ChassisData.ChassisSpeedRef.Y = -100;//
+				ChassisData.ChassisSpeedRef.Y = 100;//
 			}
 			else if(flag_gcm == 0)
 			{
-				ChassisData.ChassisSpeedRef.Y = -0;//
+				ChassisData.ChassisSpeedRef.Y = 0;//
 			}
 
 		
+	}
+	else
+	{
+		ChassisData.ChassisSpeedRef.Y = 0;
+		ChassisData.ChassisSpeedRef.X = 0;
+		ChassisData.ChassisSpeedRef.Omega  = 0;
+		ChassisData.ChassisAngle = 0;
+	
 	}
 
 	CalculateWheelSpeed(ChassisData.ChassisSpeedRef.X,\
