@@ -217,7 +217,7 @@ void OperateModeSelect(void)//车总的运动状态选择
 				}
 				else if(RC_CtrlData.rc.ch0 < - 600)
 				{
-					AutoMovement = Auto_Get_Eggs;//Auto_Get_I_Egg;
+					AutoMovement = Auto_Get_I_Egg;//Auto_Get_I_Egg;
 				}
 				
 				if(RC_CtrlData.rc.ch3 > 600)//这里的通道1,2,3会影响到很多电机的转动,还需要改
@@ -265,11 +265,11 @@ void OperateModeSelect(void)//车总的运动状态选择
 				arm_move_i = 0;
 
 			}	
-			else if(Remote_CheckJumpKey(KEY_C))//未写完
-			{
-				arm_move_i = 0;
-				AutoMovement = Auto_Up_Step;//上一层
-			}
+//			else if(Remote_CheckJumpKey(KEY_C))//这个先不写把,这个键留给我来切换图传角度
+//			{
+//				arm_move_i = 0;
+//				AutoMovement = Auto_Up_Step;//上一层
+//			}
 			else if(Remote_CheckJumpKey(KEY_E)&&RC_CtrlData.mouse.press_l ==0)
 			{
 				arm_move_i = 0;
@@ -296,11 +296,15 @@ void OperateModeSelect(void)//车总的运动状态选择
 				arm_move_i = 0;
 				AutoMovement = Auto_Cali_For_Egg;
 			}
-			else if(Remote_CheckJumpKey(KEY_G))
-			{
-				arm_move_i = 0;
-				AutoMovement = Auto_Give_Egg;
-			}
+//			else if(Remote_CheckJumpKey(KEY_G))
+//			{
+//				AutoMovement = Auto_NoMovement;
+//				arm_move_i = 0;
+//				
+//				TIM8->CCR1 = 2500;
+//				
+//				
+//			}
 
 			if(Remote_CheckJumpKey(KEY_B))
 			{
@@ -334,6 +338,7 @@ void DriversModeSelect(void)
       ChassisMode = 			Chassis_Locked;
       GuideWheelMode = GuideWheel_Locked;
 			Arm_OperateMode  = 			Arm_Locked;
+			TIM8->CCR1 = 1200;
     }break;
   
     case NormalRC_Mode:
@@ -344,6 +349,10 @@ void DriversModeSelect(void)
 			Arm_OperateMode  = 			Arm_NormalRCMode;
 
 			//遥控器模式下的自动动作未完成
+			
+			
+			//在图传转动的时候加一个标志位,用标志位改变cm_speed为-1,omega_speed也是,应该就可以了
+			
 			
 			
 			if(AutoMovement != Auto_NoMovement)//如果没有特殊动作，就保持原来的遥控模式
@@ -448,7 +457,7 @@ void DriversModeSelect(void)
 						
 				
 						
-						TIM8->CCR1 = 700;//关闭定时器，关弹舱
+						TIM8->CCR1 = 1200;//关闭定时器，关弹舱
 						arm_move_i = 0;
 				}
 			
@@ -509,7 +518,8 @@ void DriversModeSelect(void)
 						ChassisMode = Chassis_KeyMouseMode;
 						CM_SPEED_C = 0.8;
 						GuideWheelMode = GuideWheel_Locked;
-						Arm_OperateMode  = Arm_Auto_Give_Egg;				
+						Arm_OperateMode  = Arm_Auto_Give_Egg;
+						
 					}break;	
 					case Auto_Up_Island:
 					{
@@ -549,9 +559,9 @@ void DriversModeSelect(void)
 						GuideWheelMode = GuideWheel_KeyMouseMode;
 						Arm_OperateMode  = Arm_KeyMouseMode;///视觉识别时一般需要抬升，所以不锁住
 						
-						TIM8->CCR1 = 700;//关闭定时器，关弹舱
+//						TIM8->CCR1 = 1200;//关闭定时器，关弹舱
 						arm_move_i = 0;
-				ARM_LiftMotorRefAngle = 0;
+//						ARM_LiftMotorRefAngle = 0;
 			
 				}
 			}break;

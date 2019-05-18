@@ -62,3 +62,4 @@ xdrm_omniknight\driver_imagesensor.o: D:\stm32\mdk\ARM\ARMCC\Bin\..\include\stdl
 xdrm_omniknight\driver_imagesensor.o: ../Inc/Driver_Remote.h
 xdrm_omniknight\driver_imagesensor.o: ../Inc/BSP_TIM.h
 xdrm_omniknight\driver_imagesensor.o: ../Inc/DriverLib_Func.h
+xdrm_omniknight\driver_imagesensor.o: ../Inc/Driver_Chassis.h

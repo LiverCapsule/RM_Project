@@ -139,11 +139,11 @@ void Key2Speed(int16_t FB, int16_t LR)
 
 	if(Remote_CheckJumpKey(KEY_W) == 1&&RC_CtrlData.mouse.press_r == 0 &&RC_CtrlData.mouse.press_l == 0)
 	{
-		ChassisData.ChassisSpeedRef.Y = -tmp_FB*FBSpeedRamp.Calc(&FBSpeedRamp);
+		ChassisData.ChassisSpeedRef.Y = tmp_FB*FBSpeedRamp.Calc(&FBSpeedRamp);
 	}
 	else if(Remote_CheckJumpKey(KEY_S) == 1&&RC_CtrlData.mouse.press_r == 0 &&RC_CtrlData.mouse.press_l == 0)
 	{
-		ChassisData.ChassisSpeedRef.Y = tmp_FB*FBSpeedRamp.Calc(&FBSpeedRamp);
+		ChassisData.ChassisSpeedRef.Y = -tmp_FB*FBSpeedRamp.Calc(&FBSpeedRamp);
 	}
 	else
 	{
@@ -172,7 +172,7 @@ void Key2Speed(int16_t FB, int16_t LR)
 	
 }
 
-
+extern uint32_t mod3;
 extern AutoMovement_e AutoMovement;
 #include "Data_MiniPC.h"
 float angle_save = 0;
@@ -231,7 +231,7 @@ void CM_Get_SpeedRef(void)
 		{
 			X_temp = RC_CtrlData.rc.ch0;
 		}
-		ChassisData.ChassisSpeedRef.Y		= -Y_temp * CM_SPEED_C;
+		ChassisData.ChassisSpeedRef.Y		= Y_temp * CM_SPEED_C;
 		ChassisData.ChassisSpeedRef.X   	= X_temp * CM_SPEED_C; 
 		ChassisData.ChassisSpeedRef.Omega  = RC_CtrlData.rc.ch2/2 * CM_OMEGA_C;
 
@@ -245,13 +245,33 @@ void CM_Get_SpeedRef(void)
 		{
 				Key2Speed(HIGH_FORWARD_BACK_SPEED, HIGH_LEFT_RIGHT_SPEED);
 		}
-		//Key2Speed(LOW_FORWARD_BACK_SPEED, LOW_LEFT_RIGHT_SPEED);
+		else if(Remote_CheckJumpKey(KEY_CTRL))
+		{
+				Key2Speed(LOW_FORWARD_BACK_SPEED, LOW_LEFT_RIGHT_SPEED);
+		}
 		ChassisData.ChassisSpeedRef.Omega = RC_CtrlData.mouse.x*KEY_FACTOR_NORMAL;
+		static int16_t store_x = 0;
+		static int16_t store_y = 0;
+		if(mod3%3 == 0)//正常情况下,速度无需变动
+		{
+		}
+		else if(mod3%3 == 1)//右转观察倒车雷达时,左右方向呼唤
+		{store_x = -ChassisData.ChassisSpeedRef.X;
+			ChassisData.ChassisSpeedRef.X = store_x;
+		}else if(mod3%3 == 2)
+		{
+			store_x = -ChassisData.ChassisSpeedRef.X;
+			store_y = -ChassisData.ChassisSpeedRef.Y;
+			ChassisData.ChassisSpeedRef.X = store_x;
+			ChassisData.ChassisSpeedRef.Y = store_y;
+
+		}
+		
 		
 	}
 	else if(ChassisMode == 	Chassis_Auto_CaliForEgg)
 	{
-		ChassisData.ChassisSpeedRef.Y = -40;//拖链阻挡了车子,希望在机械臂抬升时能够前进,所以再加一个前移动速度
+		ChassisData.ChassisSpeedRef.Y = 40;//拖链阻挡了车子,希望在机械臂抬升时能够前进,所以再加一个前移动速度
 		if(Mini_Pc_Data.left_or_right < 112&&Mini_Pc_Data.left_or_right > 30)//-30 to 30 认为已在中间的范围
 		{
 			ChassisData.ChassisSpeedRef.X = 70;
@@ -282,7 +302,7 @@ void CM_Get_SpeedRef(void)
 
 		if(flag_gcm == 1)//这个时间阈值指从后边红外读到电平后开始计时一段时间
 		{								 //底盘到时候也用距离做
-				ChassisData.ChassisSpeedRef.Y = -200;//
+				ChassisData.ChassisSpeedRef.Y = -200;//速度方向又变了,这个到时候应该要改,
 				ChassisData.ChassisSpeedRef.X = 0;
 		}
 		
@@ -337,7 +357,7 @@ void CM_Set_Current(void)
 		CAN2_Send_CM(0,0,0,0);
 	}
 	else
-		CAN2_Send_CM( CHASSIS_SPEED_ATTENUATION * CM1SpeedPID.output, \
+		CAN2_Send_CM(CHASSIS_SPEED_ATTENUATION * CM1SpeedPID.output, \
 								 CHASSIS_SPEED_ATTENUATION * CM2SpeedPID.output, \
 								 CHASSIS_SPEED_ATTENUATION * CM3SpeedPID.output, \
 								 CHASSIS_SPEED_ATTENUATION * CM4SpeedPID.output);		

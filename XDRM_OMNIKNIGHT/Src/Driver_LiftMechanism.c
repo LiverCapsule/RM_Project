@@ -73,7 +73,13 @@ void LM_Get_SpeedRef(void)
 		}break;
 		case Lift_NormalRCMode:
 		{
+			
 			BeltMotorSpeedSet(RC_CtrlData.rc.ch3/2*LM_SPEED_C);
+			if(abs(BeltMotorSpeedRef[0]) < 50)
+			{
+				BeltMotorSpeedRef[0] = BeltMotorSpeedRef[1] = 50;//保持抬升机构向上的力,不能让后面的导轮触地
+			
+			}				
 		}break;
 		case Lift_KeyMouseMode:
 		{
@@ -87,7 +93,7 @@ void LM_Get_SpeedRef(void)
 			}
 			else
 			{
-				BeltMotorSpeedSet(0);
+				BeltMotorSpeedSet(50);
 			}
 
 		}break;

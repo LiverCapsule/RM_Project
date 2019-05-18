@@ -10,6 +10,7 @@
 #include "StatusMachine.h"
 #include "imu.h"
 #include "test_imu.h"
+#include "Driver_ImageSensor.h"
 
 uint32_t time_tick_1ms = 0;
 void ControlLoopTaskInit(void)
@@ -39,7 +40,7 @@ void ControlTask(void)
 	InfraredSensor_StateGet();
 
 
-//	ImageSensor_Control();
+	ImageSensor_Control();
 //	IMU_Task();/////
 
 	

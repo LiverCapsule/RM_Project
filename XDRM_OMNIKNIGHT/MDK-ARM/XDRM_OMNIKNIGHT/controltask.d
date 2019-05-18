@@ -71,3 +71,4 @@ xdrm_omniknight\controltask.o: ../Inc/imu.h
 xdrm_omniknight\controltask.o: ../Inc/test_imu.h
 xdrm_omniknight\controltask.o: ../Inc/BSP_SPI.h
 xdrm_omniknight\controltask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+xdrm_omniknight\controltask.o: ../Inc/Driver_ImageSensor.h

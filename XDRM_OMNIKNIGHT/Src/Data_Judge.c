@@ -165,7 +165,7 @@ void Data_Unpack_Judge(uint8_t* pData)
     uint8_t *data_addr = pData + HEADER_LEN + CMD_LEN;
 		lwei = (uint16_t )(*(pData + HEADER_LEN));
 		hwei =(uint16_t ) ((*(pData + HEADER_LEN+1))<<8);
-     CmdID = hwei |lwei;//通俗易懂
+    CmdID = hwei |lwei;//我写的通俗易懂
 	switch(CmdID)
 	{
 		case GAMESTATE_DATA_ID:
@@ -235,8 +235,10 @@ void Info_Rc_Judge(void)//
 	}
 }
 
-uint8_t InterInfo[120];
-uint8_t InterData_Judge[13];//大疆定义的结构体似乎不太好用，直接定义一个数组，以后可能在包装一下,没仔细看大疆的这个CRC校验，以后在包装
+Info_Inter_Judge_t InterJudgeInfo;
+
+
+uint8_t InterData_Judge[13];
 void Info_Sd_Judge(void)//裁判系统发送的数据就是交互的数据，即一是与客户端交互一是机器人间交互
 {
 	
@@ -251,29 +253,45 @@ void Info_Sd_Judge(void)//裁判系统发送的数据就是交互的数据，即一是与客户端交互一
 	
 	InterData_Judge[5] = 0x01;//cmd_id 交互数据为0x301
 	InterData_Judge[6] = 0x03;
-
-	//如果是客户端数据
-	InterData_Judge[7] = 0x80;//数据段内容ID,这是客户端对应的
-	InterData_Judge[8] = 0xD1;
-	InterData_Judge[9] = 0x02;//红色工程的id
-	InterData_Judge[10]= 0x00;	
-	InterData_Judge[11]= 0x02;//红色工程的客户端id，裁判系统只允许把数据发回自己对应的客户端
-	InterData_Judge[12]= 0x01;
 	
-//	InterInfo[0] = //发送先写到这里
-// InterInfo[100] = ;	
-//	memcpy(&InterData_Judge[13],InterInfo,InfoLength);//感觉以前的处理方法很好
-//	
-//	
-//	
-//	
-//	
-//	Append_CRC16_Check_Sum(InterData_Judge,InfoLength+13+1 );//总共的数据有多少就是多少
+	static uint32_t aaaabbbb = 0;
+	
+	if(aaaabbbb++%2 == 1)
+	{
+		//如果是客户端数据//这里下面的id需要先读取
+		InterData_Judge[7] = 0x80;//数据段内容ID,这是客户端对应的
+		InterData_Judge[8] = 0xD1;
+		InterData_Judge[9] = 0x02;//红色工程的id
+		InterData_Judge[10]= 0x00;	
+		InterData_Judge[11]= 0x02;//红色工程的客户端id，裁判系统只允许把数据发回自己对应的客户端
+		InterData_Judge[12]= 0x01;
+		
+		InterJudgeInfo.ClientData.data1 = 1;
+			InterJudgeInfo.ClientData.data2 = 1;
+		InterJudgeInfo.ClientData.data3 = 1;
+		InterJudgeInfo.ClientData.masks = 1;
 
-//	HAL_UART_Transmit_DMA(&huart6,InterData_Judge, InfoLength+13+1 );//22字节
 
+		memcpy(&InterData_Judge[13],&InterJudgeInfo.ClientData,13);//感觉以前的处理方法很好
 
+		Append_CRC16_Check_Sum(InterData_Judge,22);//总共的数据有多少就是多少
 
+	}
+	else
+	{
+		InterData_Judge[7] = 0x00;//
+		InterData_Judge[8] = 0x02;
+		InterData_Judge[9] = 0x02;//红色工程的id
+		InterData_Judge[10]= 0x00;	
+		InterData_Judge[11]= 0x02;//红色工程的客户端id，裁判系统只允许把数据发回自己对应的客户端
+		InterData_Judge[12]= 0x01;
+	
+	  InterJudgeInfo.InterData.data[0] = 1;
+	
+	}
+	
+	
+//	HAL_UART_Transmit_DMA(&huart6,InterData_Judge,22);//22字节
 
 
 }

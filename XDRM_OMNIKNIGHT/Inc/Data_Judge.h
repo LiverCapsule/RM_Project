@@ -228,7 +228,7 @@ typedef struct
 
 void Info_Rc_Judge(void);
 
-
+void Info_Sd_Judge(void);
 
 
 

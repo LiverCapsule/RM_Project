@@ -391,6 +391,7 @@ void Can_Send_Task(void const * argument)
 
 			Can_Send();
 			Info_Rc_Judge();
+			Info_Sd_Judge();
 			Info_Rc_MiniPC();//先放在这里
 			vTaskDelayUntil(&xLastWakeTime,1/portTICK_RATE_MS);//此时处于阻塞态
 
