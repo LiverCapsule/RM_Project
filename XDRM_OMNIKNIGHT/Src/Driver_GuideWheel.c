@@ -94,13 +94,13 @@ void GM_Get_SpeedRef(void)
 			//上岛时导轮只需向前，等待的是抬升机构编码器差值,只需存下最初上岛编码器值，大于麦轮上岛编码器值时开启，小于一定值时关闭
 			if(flag_gcm == 1)//导轮和底盘电机前进后退flag
 			{
-				GWSpeedRef[0] = 300;
-				GWSpeedRef[1] = -300;
+				GWSpeedRef[0] = 120;
+				GWSpeedRef[1] = -120;
 			}
 			else if(flag_gcm == -1)
 			{
-				GWSpeedRef[0] = -300;
-				GWSpeedRef[1] = 300;
+				GWSpeedRef[0] = -120;
+				GWSpeedRef[1] = 120;
 			}
 			else
 			{

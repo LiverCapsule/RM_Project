@@ -279,7 +279,8 @@ void OperateModeSelect(void)//车总的运动状态选择
 			else if(Remote_CheckJumpKey(KEY_Q)&&RC_CtrlData.mouse.press_l ==0)
 			{
 					arm_move_i = 0;
-			AutoMovement = Auto_Get_I_Egg;
+			//AutoMovement = Auto_Get_I_Egg;
+				AutoMovement = Auto_Pull_Eggs;
 			}
 			else if(Remote_CheckJumpKey(KEY_E) && RC_CtrlData.mouse.press_l == 1)
 			{
@@ -289,12 +290,12 @@ void OperateModeSelect(void)//车总的运动状态选择
 			else if(Remote_CheckJumpKey(KEY_Q) && RC_CtrlData.mouse.press_l == 1)
 			{
 				arm_move_i = 0;
-				AutoMovement = Auto_Get_I_Eggs;
+				AutoMovement = Auto_Get_I_Egg;
 			}
 			else if(Remote_CheckJumpKey(KEY_R))
 			{
-				arm_move_i = 0;
-				AutoMovement = Auto_Cali_For_Egg;
+//				arm_move_i = 0;
+//				AutoMovement = Auto_Cali_For_Egg;
 			}
 //			else if(Remote_CheckJumpKey(KEY_G))
 //			{
@@ -311,9 +312,13 @@ void OperateModeSelect(void)//车总的运动状态选择
 				arm_move_i = 0;
 				AutoMovement = Auto_NoMovement;
 				lift_flag_again1 =lift_flag_again =0;
-			
 				
+				ARM_UNPINCH;//新加未试
 				
+				ARM_LiftMotorRefAngle = 0;
+				ARM_RotateMotorRefAngle = 0;
+				ARM_TransMotorRefAngle = 0;
+				ARM_BACK;
 				
 				
 			}

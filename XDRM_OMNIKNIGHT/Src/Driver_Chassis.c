@@ -8,6 +8,8 @@
 #include "StatusMachine.h"
 #include "DriverLib_Ramp.h"
 #include "imu.h"
+#include "Driver_Manipulator.h"
+
 
 //#define M_PI  (float)3.1415926535f
 #define Ang2Rad(m)  (m/180.0f*M_PI)
@@ -29,9 +31,12 @@ extern uint8_t steps_down;
 uint8_t kk1 = 60;
 uint8_t kk2 = 60;
 uint8_t kk3 = 60;
-uint8_t kk4 = 60;
+uint8_t kk4 = 60;//右后轮
 
 
+int8_t Foward_flag = 0;
+int8_t key_w_last = 0;
+int8_t key_w = 0;
 void CM_Get_PID(void)
 {
 	CMRotatePID.kp =15;
@@ -52,6 +57,7 @@ void CM_Get_PID(void)
 
 
 uint32_t time_X = 0;
+int8_t chassis_stopflag = 0;
 void 	CM_Calc_Output(void)
 {
 	PID_Task(&CM1SpeedPID,ChassisData.ChassisWheelSpeedRef[0],Chassis_Motor1_Measure.speed_rpm/10.0);//float /10.0
@@ -59,11 +65,46 @@ void 	CM_Calc_Output(void)
 	PID_Task(&CM3SpeedPID,ChassisData.ChassisWheelSpeedRef[2],Chassis_Motor3_Measure.speed_rpm/10.0);
 	PID_Task(&CM4SpeedPID,ChassisData.ChassisWheelSpeedRef[3],Chassis_Motor4_Measure.speed_rpm/10.0);
 
+		key_w = Remote_CheckJumpKey(KEY_W);
+	if(ChassisMode == Chassis_KeyMouseMode)//防止下坡翻倒
+	{
+			if(key_w_last != key_w && (key_w == 0))
+			{//这里还需要延时一段时间//或者等待下一次按下w键
+				chassis_stopflag = 1;
+			}else if(key_w == 1||Remote_CheckJumpKey(KEY_A) == 1||Remote_CheckJumpKey(KEY_S) == 1 ||Remote_CheckJumpKey(KEY_D) == 1||abs(RC_CtrlData.mouse.x) >10)
+			{
+				chassis_stopflag = 0;
+			}
+			if(chassis_stopflag)
+			{
+				ChassisData.ChassisWheelSpeedRef[2] =  0;//后轮目标值为0
+				ChassisData.ChassisWheelSpeedRef[3] =  0;
+			}
+			
 
-	if(CM1SpeedPID.output>-700 && CM1SpeedPID.output<700 ) CM1SpeedPID.output=0;//我们这样是不是就不用加ki就可以停在斜坡上了
-	if(CM2SpeedPID.output>-700 && CM2SpeedPID.output<700 ) CM2SpeedPID.output=0;
-	if(CM3SpeedPID.output>-700 && CM3SpeedPID.output<700 ) CM3SpeedPID.output=0;
-	if(CM4SpeedPID.output>-700 && CM4SpeedPID.output<700 ) CM4SpeedPID.output=0;
+		
+		if(CM1SpeedPID.output>-700 && CM1SpeedPID.output<700 ) CM1SpeedPID.output=0;
+		if(CM2SpeedPID.output>-700 && CM2SpeedPID.output<700 ) CM2SpeedPID.output=0;
+		if(CM3SpeedPID.output>-700 && CM3SpeedPID.output<700 ) CM3SpeedPID.output=0;
+		if(CM4SpeedPID.output>-1500 && CM4SpeedPID.output<1500 ) CM4SpeedPID.output=0;
+		
+		if(chassis_stopflag&&key_w == 0&&Remote_CheckJumpKey(KEY_A) == 0&&Remote_CheckJumpKey(KEY_S) == 0 &&Remote_CheckJumpKey(KEY_D) == 0&&abs(RC_CtrlData.mouse.x<10))
+		{//这里还需要延时一段时间
+			CM1SpeedPID.output =  0;//前轮输出为0
+			CM2SpeedPID.output =  0;
+		}
+	}
+	else
+	{
+		if(CM1SpeedPID.output>-700 && CM1SpeedPID.output<700 ) CM1SpeedPID.output=0;
+		if(CM2SpeedPID.output>-700 && CM2SpeedPID.output<700 ) CM2SpeedPID.output=0;
+		if(CM3SpeedPID.output>-700 && CM3SpeedPID.output<700 ) CM3SpeedPID.output=0;
+		if(CM4SpeedPID.output>-1500 && CM4SpeedPID.output<1500 ) CM4SpeedPID.output=0;
+	
+	}
+			key_w_last = key_w;
+	//前轮输出为零,后轮目标值为0
+	
 	
 }
 
@@ -93,6 +134,7 @@ static void CalculateWheelSpeed(float vx, float vy, float omega, float radian, u
 	fWheelSpd[2] =  Chassis_forward_back_ref - Chassis_left_right_ref + omega;
 	fWheelSpd[3] = -Chassis_forward_back_ref - Chassis_left_right_ref + omega;
 
+	
 	  
 	//排序 找到速度最大值
 	fMaxSpd = fabs(fWheelSpd[0]);		
@@ -118,6 +160,10 @@ static void CalculateWheelSpeed(float vx, float vy, float omega, float radian, u
 		s16_WheelSpd[2]   = (int16_t)fWheelSpd[2];
 		s16_WheelSpd[3]   = (int16_t)fWheelSpd[3];
 	}
+	
+	
+
+	
 	memcpy((void*)ChassisData.ChassisWheelSpeedRef, (void*)s16_WheelSpd, 8);
 	
 	
@@ -233,13 +279,14 @@ void CM_Get_SpeedRef(void)
 		}
 		ChassisData.ChassisSpeedRef.Y		= Y_temp * CM_SPEED_C;
 		ChassisData.ChassisSpeedRef.X   	= X_temp * CM_SPEED_C; 
-		ChassisData.ChassisSpeedRef.Omega  = RC_CtrlData.rc.ch2/2 * CM_OMEGA_C;
+		ChassisData.ChassisSpeedRef.Omega  = RC_CtrlData.rc.ch2/2;//* CM_OMEGA_C+abs(Y_temp)/2;
 
 
 	}
 	else if(ChassisMode == Chassis_KeyMouseMode)
 	{
 		
+	
 		Key2Speed(NORMAL_FORWARD_BACK_SPEED, NORMAL_LEFT_RIGHT_SPEED);
 		if(Remote_CheckJumpKey(KEY_SHIFT))
 		{
@@ -254,11 +301,16 @@ void CM_Get_SpeedRef(void)
 		static int16_t store_y = 0;
 		if(mod3%3 == 0)//正常情况下,速度无需变动
 		{
+			
 		}
 		else if(mod3%3 == 1)//右转观察倒车雷达时,左右方向呼唤
-		{store_x = -ChassisData.ChassisSpeedRef.X;
+		{
+		
+			ChassisData.ChassisSpeedRef.Omega =  -ChassisData.ChassisSpeedRef.Omega; 
+			store_x = -ChassisData.ChassisSpeedRef.X;
 			ChassisData.ChassisSpeedRef.X = store_x;
-		}else if(mod3%3 == 2)
+		}
+		else if(mod3%3 == 2)
 		{
 			store_x = -ChassisData.ChassisSpeedRef.X;
 			store_y = -ChassisData.ChassisSpeedRef.Y;
@@ -267,23 +319,49 @@ void CM_Get_SpeedRef(void)
 
 		}
 		
+
+		
+		
 		
 	}
 	else if(ChassisMode == 	Chassis_Auto_CaliForEgg)
 	{
-		ChassisData.ChassisSpeedRef.Y = 40;//拖链阻挡了车子,希望在机械臂抬升时能够前进,所以再加一个前移动速度
-		if(Mini_Pc_Data.left_or_right < 112&&Mini_Pc_Data.left_or_right > 30)//-30 to 30 认为已在中间的范围
+		if(Arm_Move[arm_move_i] == ARM_DELAY_CMD&&(Arm_OperateMode == Arm_Auto_Pull_Eggs))
 		{
-			ChassisData.ChassisSpeedRef.X = 70;
+			ChassisData.ChassisSpeedRef.Y = -50;
+		
 		}
-		else if(Mini_Pc_Data.left_or_right < -30 &&Mini_Pc_Data.left_or_right > -112)
+		else
 		{
-		ChassisData.ChassisSpeedRef.X = -70;
-		}
-		else if(Mini_Pc_Data.left_or_right == 0)
+			ChassisData.ChassisSpeedRef.Y = 0;
+		}//若要取三个,在取完第一个后记录编码器的
+		if(Arm_Move[arm_move_i] == ARM_DELAY_CMD&&(Arm_OperateMode == Arm_Auto_Get_Eggs))//新加未试
 		{
-			ChassisData.ChassisSpeedRef.X = 0;
+			if(abs((abs(Chassis_Motor1_Measure.ecd_angle) + abs(Chassis_Motor2_Measure.ecd_angle)+\
+			abs(Chassis_Motor3_Measure.ecd_angle)+abs(Chassis_Motor4_Measure.ecd_angle))/4-CM_AngleMark) < 3383)
+			{
+				ChassisData.ChassisSpeedRef.X = 160;
+			}
+			else
+			{
+				ChassisData.ChassisSpeedRef.X = 0;
+				CM_AngleMark =(abs(Chassis_Motor1_Measure.ecd_angle) + abs(Chassis_Motor2_Measure.ecd_angle) +abs(Chassis_Motor3_Measure.ecd_angle)+abs(Chassis_Motor4_Measure.ecd_angle))/4;
+
+			}
 		}
+		
+//		if(Mini_Pc_Data.left_or_right < 112&&Mini_Pc_Data.left_or_right > 30)//-30 to 30 认为已在中间的范围
+//		{
+//			ChassisData.ChassisSpeedRef.X = 70;
+//		}
+//		else if(Mini_Pc_Data.left_or_right < -30 &&Mini_Pc_Data.left_or_right > -112)
+//		{
+//		ChassisData.ChassisSpeedRef.X = -70;
+//		}
+//		else if(Mini_Pc_Data.left_or_right == 0)
+//		{
+//			ChassisData.ChassisSpeedRef.X = 0;
+//		}
 	
 		//接收上位机回传的消息来进行左右前后平移
 	
@@ -302,12 +380,12 @@ void CM_Get_SpeedRef(void)
 
 		if(flag_gcm == 1)//这个时间阈值指从后边红外读到电平后开始计时一段时间
 		{								 //底盘到时候也用距离做
-				ChassisData.ChassisSpeedRef.Y = -200;//速度方向又变了,这个到时候应该要改,
+				ChassisData.ChassisSpeedRef.Y = 130;//速度方向又变了,这个到时候应该要改,
 				ChassisData.ChassisSpeedRef.X = 0;
 		}
 		
 		time_X = xTaskGetTickCount() - cm_timetick;
-		if(time_X > 2000&&cm_timetick!=0)//这里加是红外是防止时间刚开始就加，大于4000
+		if(time_X > 3000&&cm_timetick!=0)//这里加是红外是防止时间刚开始就加，大于4000
 		{
 			flag_gcm = 0;
 			lift_flag_again = 1;
@@ -318,14 +396,14 @@ void CM_Get_SpeedRef(void)
 	else if(ChassisMode == Chassis_Auto_DownIsland)
 	{
 		
-			ChassisData.ChassisSpeedRef.Omega = PID_Task(&CMRotatePID, angle_save, pitch_angle);//这个是到时候得注意的
+			ChassisData.ChassisSpeedRef.Omega = -PID_Task(&CMRotatePID, angle_save, pitch_angle);//这个是到时候得注意的
 			ChassisData.ChassisSpeedRef.Y = -200;//
 			ChassisData.ChassisSpeedRef.X = 0;
 
 			
 			if(flag_gcm == -1)
 			{
-				ChassisData.ChassisSpeedRef.Y = 100;//
+				ChassisData.ChassisSpeedRef.Y = -100;//
 			}
 			else if(flag_gcm == 0)
 			{
@@ -357,6 +435,7 @@ void CM_Set_Current(void)
 		CAN2_Send_CM(0,0,0,0);
 	}
 	else
+		
 		CAN2_Send_CM(CHASSIS_SPEED_ATTENUATION * CM1SpeedPID.output, \
 								 CHASSIS_SPEED_ATTENUATION * CM2SpeedPID.output, \
 								 CHASSIS_SPEED_ATTENUATION * CM3SpeedPID.output, \

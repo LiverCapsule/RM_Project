@@ -424,7 +424,7 @@ void GetPitchYawGxGyGz()
 //	
 	static uint32_t time = 0;
 	aaa = xTaskGetTickCount();
-	if(xTaskGetTickCount() > 10000)	//1000000
+	if(xTaskGetTickCount() > 1000)	//1000000
 	{
 		if(MPU6050_Real_Data.Gyro_Yaw*(xTaskGetTickCount() - time)/1000/1000 > 100)
 		{
@@ -434,6 +434,18 @@ void GetPitchYawGxGyGz()
 		pitch_angle += MPU6050_Real_Data.Gyro_Roll*(xTaskGetTickCount() - time)/1000;///1000;
 
 		yaw_angle += MPU6050_Real_Data.Gyro_Yaw*(xTaskGetTickCount() - time)/1000;///1000;
+		if(roll_angle > 360 || roll_angle<-360)
+		{
+			roll_angle = 0;
+		}
+		if(pitch_angle > 360 || pitch_angle<-360)
+		{
+			pitch_angle = 0;
+		}
+		if(yaw_angle > 360 || yaw_angle<-360)
+		{
+			yaw_angle = 0;
+		}
 		time = xTaskGetTickCount();
 	}
 }

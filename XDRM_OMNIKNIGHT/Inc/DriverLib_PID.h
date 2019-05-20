@@ -20,7 +20,7 @@
 
 
 
-#define POSITION_KP_DEFAULTS  10.0
+#define POSITION_KP_DEFAULTS  8.0
 #define POSITION_KI_DEFAULTS  0
 #define POSITION_KD_DEFAULTS  0
 
@@ -118,11 +118,11 @@ enum
 	0,\
 	0,\
 	0,\
-	9000,\
+	8000,\
 	8000,\
 	8000,\
 	0,\
-	13000,\
+	8000,\
 	0,\
 	POSITION_PID,\
 	&PID_Calc,\
@@ -145,7 +145,7 @@ enum
 	800,\
 	800,\
 	0,\
-	1000,\
+	1200,\
 	0,\
 	POSITION_PID,\
 	&PID_Calc,\

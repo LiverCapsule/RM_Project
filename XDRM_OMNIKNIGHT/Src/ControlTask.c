@@ -41,7 +41,7 @@ void ControlTask(void)
 
 
 	ImageSensor_Control();
-//	IMU_Task();/////
+	IMU_Task();/////
 
 	
 }

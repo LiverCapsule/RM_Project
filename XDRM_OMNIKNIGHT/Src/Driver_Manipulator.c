@@ -9,9 +9,10 @@
 extern TIM_HandleTypeDef htim8;
 
 #define ROTATE_M_ANGLE 1400//1600			  //岛上为1000,岛下1700,岛上惯性大,所以反而更小
-#define ROTATE_ANGLE 3200//         //岛上为3100,岛下为2700,岛上会给足够的时间到达目标值,水平3300
-#define ROTATE_M_ANGLE_DELTA -600
+#define ROTATE_ANGLE 3400//         //岛上为3100,岛下为2700,岛上会给足够的时间到达目标值,水平3300
+#define ROTATE_M_ANGLE_DELTA -0
 #define ROTATE_ANGLE_DELTA 0
+#define ROTATE_ANGLE_MAX 3500
 //岛上取弹有足够的时间稳定//2500//这里也改了,未知原因2700//实际机械臂在电机编码器3300位置时达到水平,但是由于惯性会超前转动,所以在这里将目标值改小
 #define ROTATE_H_ANGLE 2300
 
@@ -21,32 +22,12 @@ extern TIM_HandleTypeDef htim8;
 
 #define LIFT_ANGLE 6100//左边目标为-值 指抬升到中间
 #define LIFT_H_ANGLE 8400//10400//8400//8300为岛上高度,此时气缸减震没气,若加了需要在调低//10400
-#define LIFT_ANGLE_DELTA 1900
+#define LIFT_ANGLE_DELTA 2400
 
 //岛上时整车高度一改,抬升高度和翻转角度都得改
 
 
 Arm_OperateMode_e Arm_OperateMode;
-#define ARM_PINCH_CMD 	1
-#define ARM_UNPINCH_CMD 2
-#define ARM_AHEAD_CMD 	3
-#define ARM_BACK_CMD 		4
-#define ARM_RAISE_CMD	  5//
-#define ARM_HRAISE_CMD  6//抬到最高
-#define ARM_LFALL_CMD		7//降到最低
-#define ARM_FALL_CMD    8//
-#define ARM_ROTATE_I_CMD  9//刚开始默认为收回状态,朝内
-#define ARM_ROTATE_O_CMD  10//
-#define ARM_ROTATE_M_CMD  11
-#define ARM_LEFT_CMD   12
-#define ARM_RIGHT_CMD  13
-#define ARM_MIDDLE_CMD 14
-#define ARM_GIVE_CMD   15
-#define ARM_OPEN_CMD   16
-#define ARM_ROTATE_H_CMD 17 //为了抬高弹药箱所作的翻转
-#define ARM_MOVE_END_CMD 18
-#define ARM_I_LOW_CMD 19
-
 
 uint8_t arm_move_i = 0;//机械臂的实时动作
 
@@ -58,25 +39,21 @@ uint8_t arm_move_i = 0;//机械臂的实时动作
 //ARM_HRAISE_CMD,ARM_LEFT_CMD,ARM_AHEAD_CMD,ARM_FALL_CMD,ARM_PINCH_CMD,ARM_BACK_CMD,ARM_HRAISE_CMD,ARM_RIGHT_CMD,ARM_AHEAD_CMD,\
 //ARM_FALL_CMD,ARM_ROTATE_CMD,ARM_PINCH_CMD,ARM_BACK_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_CMD,ARM_MIDDLE_CMD};
 
-uint8_t Arm_Fetch_Egg[40] = {ARM_MIDDLE_CMD,ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};//MIDLE//定义为全局变量，此时除已赋值单元外，其余为单元为0
+uint8_t Arm_Fetch_Egg[40] = {ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};//MIDLE//定义为全局变量，此时除已赋值单元外，其余为单元为0
 
 																																																		//这里MIDDLE先删掉了						
-uint8_t Arm_Fetch_Egg2[40] ={ARM_RIGHT_CMD,ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,\
-														 ARM_LEFT_CMD,ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_H_CMD,ARM_MIDDLE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,\
-														 ARM_LEFT_CMD};//取两个，当弹舱不够大，但是能脱离围栏(不一定)								//这个是平移是被卡住了
-//夹取两个目前因为车高(不想给底部气缸充气，懒得试了)及机械臂抬升高度不够所以无法将弹药箱脱离围栏,往往是机械臂被卡住,底盘反方向动,还有一个解绝方案是夹第二个时,底盘跟着动
-														 //现在不太想写了
-//有一个问题是,机械臂的位置,1是重启问题,2是操作手夹取时,他的原位置3是操作手夹取时,他取了弹药箱后的翻转位置
+uint8_t Arm_Fetch_Egg2[40] ={ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_FALL_CMD,\
+														 ARM_DELAY_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_FALL_CMD,\
+														 ARM_DELAY_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};//取两个，当弹舱不够大，但是能脱离围栏(不一定)								//这个是平移是被卡住了
+//取完第一个后在机械臂中延时等待,底盘水平移动一段恒定距离
 
-
-														 
+uint8_t Arm_Pull_I_Egg[40]	={ARM_RAISE_CMD,ARM_ROTATE_MAX_CMD,ARM_AHEAD_CMD,ARM_PINCH_CMD,\
+	ARM_BACK_CMD,ARM_DELAY_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};													 
 																														//先翻了，气缸等待
-//uint8_t Arm_Fetch_I_Egg[40] = {ARM_MIDDLE_CMD,ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_AHEAD_CMD,ARM_PINCH_CMD,\
-//	ARM_BACK_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD};//加了平移电机后MIDDLE_CMD需要注意一下
 
-uint8_t Arm_Fetch_I_Egg[40] = {ARM_MIDDLE_CMD,ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_AHEAD_CMD,ARM_PINCH_CMD,\
-	ARM_BACK_CMD,ARM_UNPINCH_CMD,ARM_I_LOW_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};//加了平移电机后MIDDLE_CMD需要注意一下
-	
+//uint8_t Arm_Fetch_I_Egg[40] = {ARM_MIDDLE_CMD,ARM_RAISE_CMD,ARM_ROTATE_MAX_CMD,ARM_AHEAD_CMD,ARM_PINCH_CMD,\
+//	ARM_BACK_CMD,ARM_UNPINCH_CMD,ARM_I_LOW_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};//加了平移电机后MIDDLE_CMD需要注意一下
+	uint8_t Arm_Fetch_I_Egg[40] = {ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};
 	
 //这里的eggs指的是两个弹药箱
 	
@@ -157,7 +134,7 @@ void Arm_Movement_Split(void)//步骤拆分开
 			{
 					Arm_Move[move_n] = 0;
 
-//				Arm_Move[move_n] = Arm_Pull_I_Eggs[move_n];
+				Arm_Move[move_n] = Arm_Pull_I_Egg[move_n];
 			}
 		}break;
 	
@@ -210,12 +187,12 @@ void Arm_Movement_Split(void)//步骤拆分开
 			ARM_RotateMotorRefAngle = 0;
 			ARM_TransMotorRefAngle = 0;
 			
-			if(Remote_CheckJumpKey(KEY_G)&&RC_CtrlData.mouse.press_l == 0)
+			if(Remote_CheckJumpKey(KEY_R)&&RC_CtrlData.mouse.press_r == 0&&RC_CtrlData.mouse.press_l == 1)
 			{
-				ARM_LiftMotorRefAngle = LIFT_H_ANGLE;
+				ARM_LiftMotorRefAngle = LIFT_H_ANGLE+1800;
 				TIM8->CCR1 = 2500;
 			}
-			if(Remote_CheckJumpKey(KEY_G)&&RC_CtrlData.mouse.press_l == 1)
+			if(Remote_CheckJumpKey(KEY_R)&&RC_CtrlData.mouse.press_r == 1&&RC_CtrlData.mouse.press_l == 0)
 			{
 				static uint32_t egg_mark = 0;
 				if(TIM8->CCR1 == 2500)//就是一个延时
@@ -237,7 +214,7 @@ void Arm_Movement_Split(void)//步骤拆分开
 	}
 }
 
-
+uint32_t CM_AngleMark = 0;
 uint32_t time_mark_fb = 0;
 uint32_t time_mark_bf = 0;
 
@@ -264,7 +241,7 @@ void ArmPart_Get_Movement(void)
 				ARM_PINCH;			//控制这个的电磁阀和弹弹药箱的电磁阀用同一个
 				Egg_Box_Held++;
 				
-					if(xTaskGetTickCount() - arm_time_mark > 400)
+				if(xTaskGetTickCount() - arm_time_mark > 400)
 				{
 					arm_move_i++;		
 				}
@@ -277,7 +254,7 @@ void ArmPart_Get_Movement(void)
 				
 				if(Arm_OperateMode == Arm_Auto_Get_I_Egg)
 				{
-						if(xTaskGetTickCount() - arm_time_mark > 3000)
+						if(xTaskGetTickCount() - arm_time_mark > 0)
 						{
 							arm_move_i++;		
 						}
@@ -292,7 +269,7 @@ void ArmPart_Get_Movement(void)
 			{
 				ARM_AHEAD;
 				
-				if(xTaskGetTickCount() - arm_time_mark > 1000)//这个可以正常使用
+				if(xTaskGetTickCount() - arm_time_mark > 800)//这个可以正常使用
 				{
 					arm_move_i++;		
 				}
@@ -303,7 +280,7 @@ void ArmPart_Get_Movement(void)
 			{
 				ARM_BACK;
 				
-				if(xTaskGetTickCount() - arm_time_mark > 1000)
+				if(xTaskGetTickCount() - arm_time_mark > 800)
 				{
 					arm_move_i++;		
 				}
@@ -314,9 +291,9 @@ void ArmPart_Get_Movement(void)
 			}break;
 			case ARM_RAISE_CMD:
 			{
-
+				CM_AngleMark =(abs(Chassis_Motor1_Measure.ecd_angle) + abs(Chassis_Motor2_Measure.ecd_angle) +abs(Chassis_Motor3_Measure.ecd_angle)+abs(Chassis_Motor4_Measure.ecd_angle))/4;
 				ARM_LiftMotorRefAngle = LIFT_ANGLE;
-				if(Arm_OperateMode == Arm_Auto_Get_I_Egg||Arm_OperateMode == Arm_Auto_Get_I_Eggs)
+				if(Arm_OperateMode == Arm_Auto_Get_I_Eggs||Arm_OperateMode == Arm_Auto_Pull_Eggs)//Arm_OperateMode == Arm_Auto_Get_I_Egg||
 				{
 					ARM_LiftMotorRefAngle += LIFT_ANGLE_DELTA;
 				}
@@ -421,7 +398,7 @@ void ArmPart_Get_Movement(void)
 //				{
 					if(FlipArm_Motor_Measure.ecd_angle > ROTATE_ANGLE-50)
 					{
-						if(xTaskGetTickCount() - arm_time_mark > 500)
+						if(xTaskGetTickCount() - arm_time_mark > 600)
 						{
 							arm_move_i++;		
 						}
@@ -429,6 +406,26 @@ void ArmPart_Get_Movement(void)
 //				}
 				
 	
+					
+			}break;
+					case ARM_ROTATE_MAX_CMD:
+			{
+				ARM_RotateMotorRefAngle = ROTATE_ANGLE_MAX;
+				
+//				if(Arm_OperateMode == Arm_Auto_Get_I_Egg||Arm_OperateMode == Arm_Auto_Get_I_Eggs)
+//				{
+//					ARM_RotateMotorRefAngle += ROTATE_ANGLE_DELTA;
+//				}
+				
+
+					if(FlipArm_Motor_Measure.ecd_angle > ROTATE_ANGLE-50)
+					{
+						if(xTaskGetTickCount() - arm_time_mark > 600)
+						{
+							arm_move_i++;		
+						}
+					}	
+
 					
 			}break;
 			case ARM_ROTATE_H_CMD:
@@ -470,7 +467,14 @@ void ArmPart_Get_Movement(void)
 					AutoMovement = Auto_NoMovement;//新增未测试
 					Arm_OperateMode = Arm_KeyMouseMode;
 			}break;
-
+			case ARM_DELAY_CMD:
+			{
+				//单纯的给延时用的,目前是给底盘用
+				if(xTaskGetTickCount() - arm_time_mark > 700)//延时3秒
+				{
+					arm_move_i++;		
+				}
+			}
 			default:
 			{			
 			}
@@ -501,7 +505,7 @@ float pos_kp = 10;
 
 float arm_output_c =  1;
 
-float rotate_pos_kp[5] = {5,8,5,5,10};
+float rotate_pos_kp[5] = {4,8,5,5,10};
 float rotate_speed_kp[5] = {3,30,20,10,5};
 void Arm_Motor_Get_PID_Para(void)//以后变量命名以其用途位置等命名，不要以他是什么东西命名
 {

@@ -59,6 +59,7 @@
 #include "BSP.h"
 #include "imu.h"
 #include "test_imu.h"
+#include "Driver_Manipulator.h"
 
 /* USER CODE END Includes */
 
@@ -98,9 +99,10 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 
+
   HAL_Init();
 
-
+	
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -112,13 +114,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
 	BSP_Init();
-
-
+	ARM_UNPINCH;
+	ARM_BACK;
   /* USER CODE BEGIN 2 */
 
-//	MPU6500_Init();//陀螺仪传感器初始化
+	MPU6500_Init();//陀螺仪传感器初始化x
 
-//	IMU_Cali();
+	IMU_Cali();
 	
   /* USER CODE END 2 */
 
