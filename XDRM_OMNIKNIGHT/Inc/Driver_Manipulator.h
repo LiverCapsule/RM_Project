@@ -48,6 +48,8 @@ typedef enum
 #define ARM_I_LOW_CMD 19
 #define ARM_DELAY_CMD 20
 #define ARM_ROTATE_MAX_CMD 21
+#define ARM_WAIT_CM_CMD 22
+#define ARM_ROTATE_AWAY_CMD 23
 extern uint32_t CM_AngleMark;
 
 extern uint8_t Arm_Move[40];

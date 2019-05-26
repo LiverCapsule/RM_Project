@@ -64,3 +64,7 @@ xdrm_omniknight\driver_liftmechanism.o: ../Inc/DriverLib_PID.h
 xdrm_omniknight\driver_liftmechanism.o: ../Inc/CanBusTask.h
 xdrm_omniknight\driver_liftmechanism.o: ../Inc/Driver_Remote.h
 xdrm_omniknight\driver_liftmechanism.o: ../Inc/Driver_Sensor.h
+xdrm_omniknight\driver_liftmechanism.o: ../Inc/imu.h
+xdrm_omniknight\driver_liftmechanism.o: ../Inc/test_imu.h
+xdrm_omniknight\driver_liftmechanism.o: ../Inc/BSP_SPI.h
+xdrm_omniknight\driver_liftmechanism.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h

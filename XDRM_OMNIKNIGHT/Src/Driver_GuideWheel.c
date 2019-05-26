@@ -117,13 +117,13 @@ void GM_Get_SpeedRef(void)
 		{
 			if(flag_gcm == 1)//导轮和底盘电机前进后退flag
 			{
-				GWSpeedRef[0] = 120;
-				GWSpeedRef[1] = -120;
+				GWSpeedRef[0] = 70;
+				GWSpeedRef[1] = -70;
 			}
 			else if(flag_gcm == -1)
 			{
-				GWSpeedRef[0] = -120;
-				GWSpeedRef[1] = 120;
+				GWSpeedRef[0] = -70;
+				GWSpeedRef[1] = 70;
 			}
 			else
 			{

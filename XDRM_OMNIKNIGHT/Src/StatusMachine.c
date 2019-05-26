@@ -45,6 +45,7 @@ extern float CM_OMEGA_C;
 extern float LM_SPEED_C;
 extern float AM_SPEED_C;
 
+extern int16_t LiftAngleRef;
 uint8_t key_b_cnt = 0;
 uint8_t key_b_cnt_last;
 
@@ -220,15 +221,33 @@ void OperateModeSelect(void)//车总的运动状态选择
 					AutoMovement = Auto_Get_I_Egg;//Auto_Get_I_Egg;
 				}
 				
-				if(RC_CtrlData.rc.ch3 > 600)//这里的通道1,2,3会影响到很多电机的转动,还需要改
+				if(RC_CtrlData.rc.ch1 > 600)//这里的通道1,2,3会影响到很多电机的转动,还需要改
+				{
+					AutoMovement = Auto_Pull_Eggs;
+				}
+				else if(RC_CtrlData.rc.ch1 < - 600)//通道1 3还有问题
+				{
+					AutoMovement = Auto_Get_I_Egg;
+				}
+				
+					
+				if(RC_CtrlData.rc.ch2 > 600)
+				{
+					AutoMovement = Auto_Up_Island;
+				}
+				else if(RC_CtrlData.rc.ch2 < - 600)
+				{
+					AutoMovement = Auto_Down_Island;
+				}
+				
+				if(RC_CtrlData.rc.ch3 > 600)
 				{
 					AutoMovement = Auto_Get_Eggs;
 				}
-				else if(RC_CtrlData.rc.ch3 < - 600)//通道1 3还有问题
+				else if(RC_CtrlData.rc.ch3 < - 600)
 				{
 					AutoMovement = Auto_Get_I_Eggs;
 				}
-				
 				
 				
 				
@@ -276,21 +295,21 @@ void OperateModeSelect(void)//车总的运动状态选择
 
 				AutoMovement = Auto_Get_Egg;
 			}
-			else if(Remote_CheckJumpKey(KEY_Q)&&RC_CtrlData.mouse.press_l ==0)
+			else if(Remote_CheckJumpKey(KEY_Q)&&RC_CtrlData.mouse.press_l ==1)
 			{
 					arm_move_i = 0;
 			//AutoMovement = Auto_Get_I_Egg;
-				AutoMovement = Auto_Pull_Eggs;
+				AutoMovement = Auto_Get_I_Egg;
 			}
 			else if(Remote_CheckJumpKey(KEY_E) && RC_CtrlData.mouse.press_l == 1)
 			{
 				arm_move_i = 0;
-				AutoMovement = Auto_Get_Eggs;
+//				AutoMovement = Auto_Get_Egg;
 			}
-			else if(Remote_CheckJumpKey(KEY_Q) && RC_CtrlData.mouse.press_l == 1)
+			else if(Remote_CheckJumpKey(KEY_Q) && RC_CtrlData.mouse.press_r == 1)
 			{
 				arm_move_i = 0;
-				AutoMovement = Auto_Get_I_Egg;
+				AutoMovement = Auto_Pull_Eggs;
 			}
 			else if(Remote_CheckJumpKey(KEY_R))
 			{
@@ -302,7 +321,7 @@ void OperateModeSelect(void)//车总的运动状态选择
 //				AutoMovement = Auto_NoMovement;
 //				arm_move_i = 0;
 //				
-//				TIM8->CCR1 = 2500;
+////				TIM8->CCR1 = 2400;
 //				
 //				
 //			}
@@ -319,6 +338,7 @@ void OperateModeSelect(void)//车总的运动状态选择
 				ARM_RotateMotorRefAngle = 0;
 				ARM_TransMotorRefAngle = 0;
 				ARM_BACK;
+				LiftAngleRef = 0;
 				
 				
 			}
@@ -343,7 +363,9 @@ void DriversModeSelect(void)
       ChassisMode = 			Chassis_Locked;
       GuideWheelMode = GuideWheel_Locked;
 			Arm_OperateMode  = 			Arm_Locked;
-			TIM8->CCR1 = 1200;
+			//TIM8->CCR1 = 1200;
+			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,GPIO_PIN_RESET);
+
     }break;
   
     case NormalRC_Mode:
@@ -366,7 +388,7 @@ void DriversModeSelect(void)
 				{
 					case Auto_Get_Eggs:
 					{
-						LiftMechanismMode =		 Lift_Locked;
+						LiftMechanismMode =		 Lift_NormalRCMode;//为了使其左右平移取弹时不受后面辅助轮影响
 						ChassisMode = Chassis_Auto_CaliForEgg;//何时进行校准,需要视稳定性改变
 						GuideWheelMode = GuideWheel_Locked;
 						Arm_OperateMode  = Arm_Auto_Get_Eggs;
@@ -382,7 +404,7 @@ void DriversModeSelect(void)
 					}break;
 					case Auto_Get_I_Eggs:
 					{
-						LiftMechanismMode =		 Lift_Locked;
+						LiftMechanismMode =		 Lift_NormalRCMode;
 						ChassisMode = Chassis_Auto_CaliForEgg;
 						GuideWheelMode = GuideWheel_Locked;
 						Arm_OperateMode  = Arm_Auto_Get_I_Eggs;				
@@ -461,8 +483,9 @@ void DriversModeSelect(void)
 						//目前4.24 机械臂和导轮的driver层中遥控器控制函数还需要改动
 						
 				
-						
-						TIM8->CCR1 = 1200;//关闭定时器，关弹舱
+						HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,GPIO_PIN_RESET);
+
+			//			TIM8->CCR1 = 1200;//关闭定时器，关弹舱
 						arm_move_i = 0;
 				}
 			
@@ -482,7 +505,7 @@ void DriversModeSelect(void)
 				{
 					case Auto_Get_Eggs:
 					{
-						LiftMechanismMode =		 Lift_Locked;
+						LiftMechanismMode =		 Lift_KeyMouseMode;
 						ChassisMode = Chassis_Auto_CaliForEgg;
 						GuideWheelMode = GuideWheel_Locked;
 						Arm_OperateMode  = Arm_Auto_Get_Eggs;
@@ -498,7 +521,7 @@ void DriversModeSelect(void)
 					}break;
 					case Auto_Get_I_Eggs:
 					{
-						LiftMechanismMode =		 Lift_Locked;
+						LiftMechanismMode =		 Lift_KeyMouseMode;
 						ChassisMode = Chassis_Auto_CaliForEgg;
 						GuideWheelMode = GuideWheel_Locked;
 						Arm_OperateMode  = Arm_Auto_Get_I_Eggs;				
@@ -564,7 +587,7 @@ void DriversModeSelect(void)
 						GuideWheelMode = GuideWheel_KeyMouseMode;
 						Arm_OperateMode  = Arm_KeyMouseMode;///视觉识别时一般需要抬升，所以不锁住
 						
-//						TIM8->CCR1 = 1200;//关闭定时器，关弹舱
+
 						arm_move_i = 0;
 //						ARM_LiftMotorRefAngle = 0;
 			

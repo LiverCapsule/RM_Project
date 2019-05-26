@@ -32,20 +32,20 @@ void SteerAngleSet(void)
 		if(mod3%3 == 0)//看向前方为2020
 		{
 			TIM8->CCR3 = 2000;
-			TIM8->CCR4 = 640;
+			TIM8->CCR4 = 600;
 		}
 		else if(mod3%3 == 1)//看向倒车雷达为1700
 		{
 			
-			TIM8->CCR3 = 1400;
-			TIM8->CCR4 = 640;
+			TIM8->CCR3 = 1300;
+			TIM8->CCR4 = 600;
 			
 		}	
 		else if(mod3%3 == 2)//看向车后为750
 		{
 			TIM8->CCR3 = 2100;
 
-			TIM8->CCR4 = 1850;
+			TIM8->CCR4 = 1740;
 			
 		}
 		image_anglekeylast = image_anglekey;
@@ -53,7 +53,7 @@ void SteerAngleSet(void)
 	else 
 	{
 		TIM8->CCR3 = 2000;
-		TIM8->CCR4 = 640;
+		TIM8->CCR4 = 600;
 	}
 	
 	

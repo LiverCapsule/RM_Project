@@ -9,20 +9,20 @@
 extern TIM_HandleTypeDef htim8;
 
 #define ROTATE_M_ANGLE 1400//1600			  //µºÉÏÎª1000,µºÏÂ1700,µºÉÏ¹ßÐÔ´ó,ËùÒÔ·´¶ø¸üÐ¡
-#define ROTATE_ANGLE 3400//         //µºÉÏÎª3100,µºÏÂÎª2700,µºÉÏ»á¸ø×ã¹»µÄÊ±¼äµ½´ïÄ¿±êÖµ,Ë®Æ½3300
+#define ROTATE_ANGLE 3250//3200//         //3500,µºÉÏ»á¸ø×ã¹»µÄÊ±¼äµ½´ïÄ¿±êÖµ,Ë®Æ½3300
 #define ROTATE_M_ANGLE_DELTA -0
-#define ROTATE_ANGLE_DELTA 0
-#define ROTATE_ANGLE_MAX 3500
-//µºÉÏÈ¡µ¯ÓÐ×ã¹»µÄÊ±¼äÎÈ¶¨//2500//ÕâÀïÒ²¸ÄÁË,Î´ÖªÔ­Òò2700//Êµ¼Ê»úÐµ±ÛÔÚµç»ú±àÂëÆ÷3300Î»ÖÃÊ±´ïµ½Ë®Æ½,µ«ÊÇÓÉÓÚ¹ßÐÔ»á³¬Ç°×ª¶¯,ËùÒÔÔÚÕâÀï½«Ä¿±êÖµ¸ÄÐ¡
-#define ROTATE_H_ANGLE 2300
+#define ROTATE_ANGLE_DELTA 100
+#define ROTATE_ANGLE_MAX 3400
 
+#define ROTATE_ANGLE_AWAY 2700
 #define MOVE_ANGLE_R 0//25000
 #define MOVE_ANGLE_M 0//ÏÖÔÚÈ¥ÁË×óÓÒ×ÔÓÉ¶È14000
 
 
-#define LIFT_ANGLE 6100//×ó±ßÄ¿±êÎª-Öµ Ö¸Ì§Éýµ½ÖÐ¼ä
-#define LIFT_H_ANGLE 8400//10400//8400//8300ÎªµºÉÏ¸ß¶È,´ËÊ±Æø¸×¼õÕðÃ»Æø,Èô¼ÓÁËÐèÒªÔÚµ÷µÍ//10400
-#define LIFT_ANGLE_DELTA 2400
+#define LIFT_ANGLE 6450//6700//6100//×ó±ßÄ¿±êÎª-Öµ Ö¸Ì§Éýµ½ÖÐ¼ä
+#define LIFT_ANGLE_DELTA1 -0
+#define LIFT_H_ANGLE 8800
+#define LIFT_ANGLE_DELTA 2250//2500
 
 //µºÉÏÊ±Õû³µ¸ß¶ÈÒ»¸Ä,Ì§Éý¸ß¶ÈºÍ·­×ª½Ç¶È¶¼µÃ¸Ä
 
@@ -32,32 +32,22 @@ Arm_OperateMode_e Arm_OperateMode;
 uint8_t arm_move_i = 0;//»úÐµ±ÛµÄÊµÊ±¶¯×÷
 
 
-//uint8_t Arm_Fetch_I_Egg2[40] = {ARM_MIDDLE_CMD,ARM_RAISE_CMD,ARM_AHEAD_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_BACK_CMD,\
-//ARM_ROTATE_I_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD};//À­»ØÀ´·­£¬²»Ì§µ½×î¸ß
-	
-//uint8_t Arm_Pull_I_Eggs[40] = {ARM_MIDDLE_CMD,ARM_RAISE_CMD,ARM_AHEAD_CMD,ARM_ROTATE_CMD,ARM_PINCH_CMD,ARM_BACK_CMD,\
-//ARM_HRAISE_CMD,ARM_LEFT_CMD,ARM_AHEAD_CMD,ARM_FALL_CMD,ARM_PINCH_CMD,ARM_BACK_CMD,ARM_HRAISE_CMD,ARM_RIGHT_CMD,ARM_AHEAD_CMD,\
-//ARM_FALL_CMD,ARM_ROTATE_CMD,ARM_PINCH_CMD,ARM_BACK_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_CMD,ARM_MIDDLE_CMD};
-
-uint8_t Arm_Fetch_Egg[40] = {ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};//MIDLE//¶¨ÒåÎªÈ«¾Ö±äÁ¿£¬´ËÊ±³ýÒÑ¸³Öµµ¥ÔªÍâ£¬ÆäÓàÎªµ¥ÔªÎª0
+uint8_t Arm_Fetch_Egg[40] = {ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_AWAY_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};//MIDLE//¶¨ÒåÎªÈ«¾Ö±äÁ¿£¬´ËÊ±³ýÒÑ¸³Öµµ¥ÔªÍâ£¬ÆäÓàÎªµ¥ÔªÎª0
 
 																																																		//ÕâÀïMIDDLEÏÈÉ¾µôÁË						
 uint8_t Arm_Fetch_Egg2[40] ={ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_FALL_CMD,\
-														 ARM_DELAY_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_FALL_CMD,\
-														 ARM_DELAY_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};//È¡Á½¸ö£¬µ±µ¯²Õ²»¹»´ó£¬µ«ÊÇÄÜÍÑÀëÎ§À¸(²»Ò»¶¨)								//Õâ¸öÊÇÆ½ÒÆÊÇ±»¿¨×¡ÁË
+														 ARM_WAIT_CM_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_FALL_CMD,\
+														 ARM_WAIT_CM_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};//È¡Á½¸ö£¬µ±µ¯²Õ²»¹»´ó£¬µ«ÊÇÄÜÍÑÀëÎ§À¸(²»Ò»¶¨)								//Õâ¸öÊÇÆ½ÒÆÊÇ±»¿¨×¡ÁË
 //È¡ÍêµÚÒ»¸öºóÔÚ»úÐµ±ÛÖÐÑÓÊ±µÈ´ý,µ×ÅÌË®Æ½ÒÆ¶¯Ò»¶Îºã¶¨¾àÀë
 
 uint8_t Arm_Pull_I_Egg[40]	={ARM_RAISE_CMD,ARM_ROTATE_MAX_CMD,ARM_AHEAD_CMD,ARM_PINCH_CMD,\
 	ARM_BACK_CMD,ARM_DELAY_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};													 
 																														//ÏÈ·­ÁË£¬Æø¸×µÈ´ý
 
-//uint8_t Arm_Fetch_I_Egg[40] = {ARM_MIDDLE_CMD,ARM_RAISE_CMD,ARM_ROTATE_MAX_CMD,ARM_AHEAD_CMD,ARM_PINCH_CMD,\
-//	ARM_BACK_CMD,ARM_UNPINCH_CMD,ARM_I_LOW_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};//¼ÓÁËÆ½ÒÆµç»úºóMIDDLE_CMDÐèÒª×¢ÒâÒ»ÏÂ
-	uint8_t Arm_Fetch_I_Egg[40] = {ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_O_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};
+	uint8_t Arm_Fetch_I_Egg[40] = {ARM_RAISE_CMD,ARM_ROTATE_O_CMD,ARM_PINCH_CMD,ARM_HRAISE_CMD,ARM_ROTATE_M_CMD,ARM_ROTATE_AWAY_CMD,ARM_UNPINCH_CMD,ARM_ROTATE_I_CMD,ARM_LFALL_CMD,ARM_MOVE_END_CMD};
 	
 //ÕâÀïµÄeggsÖ¸µÄÊÇÁ½¸öµ¯Ò©Ïä
-	
-//uint8_t Arm_Give_Egg[40] = {ARM_RAISE_CMD,ARM_OPEN_CMD,ARM_HRAISE_CMD};//
+
 
 //uint8_t
 //Í¨¹ý×´Ì¬»ú»ñµÃ
@@ -137,27 +127,7 @@ void Arm_Movement_Split(void)//²½Öè²ð·Ö¿ª
 				Arm_Move[move_n] = Arm_Pull_I_Egg[move_n];
 			}
 		}break;
-	
-//		case Arm_Auto_Give_Egg:
-//		{
-//			for(uint8_t move_n = 0;move_n < 40;move_n++)
-//			{
-//					Arm_Move[move_n] = Arm_Give_Egg[40];
-//			}
-//			ARM_LiftMotorRefAngle = LIFT_ANGLE;
-//			TIM8->CCR1 = 2500;
-//			
-//		}break;
-//		case Arm_Auto_Close_Door:
-//		{
-//			for(uint8_t move_n = 0;move_n < 40;move_n++)
-//			{
-//					Arm_Move[move_n] = 0;
-//			}
-//			ARM_LiftMotorRefAngle = LIFT_ANGLE;
-//			TIM8->CCR1 = 2500;
-//			
-//		}break;
+
 		case Arm_Locked:
 		{
 			for(uint8_t move_n = 0;move_n < 40;move_n++)
@@ -189,19 +159,45 @@ void Arm_Movement_Split(void)//²½Öè²ð·Ö¿ª
 			
 			if(Remote_CheckJumpKey(KEY_R)&&RC_CtrlData.mouse.press_r == 0&&RC_CtrlData.mouse.press_l == 1)
 			{
-				ARM_LiftMotorRefAngle = LIFT_H_ANGLE+1800;
-				TIM8->CCR1 = 2500;
+				static uint32_t egg_mark2 = 0;
+				if(ARM_LiftMotorRefAngle ==0)//Êµ¼ÊÖÐ¿ÉÄÜ»áÓÐÒ»Ð©ÎÊÌâ
+				{
+					egg_mark2 = xTaskGetTickCount();
+				
+				}
+				ARM_LiftMotorRefAngle =  LIFT_H_ANGLE+1800;//10600
+				
+				if(xTaskGetTickCount() - egg_mark2 >1000)
+				{
+				  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,GPIO_PIN_SET);
+				}
+				
+//				TIM8->CCR1 = 2400;
+			
 			}
 			if(Remote_CheckJumpKey(KEY_R)&&RC_CtrlData.mouse.press_r == 1&&RC_CtrlData.mouse.press_l == 0)
 			{
+	//			static uint32_t egg_mark = 0;
+	//			if(TIM8->CCR1 == 2400)//¾ÍÊÇÒ»¸öÑÓÊ±
+	//			{
+	//				egg_mark = xTaskGetTickCount();
+	//			
+	//			}
+	//			TIM8->CCR1 = 1200;
+	//			if(xTaskGetTickCount() - egg_mark >1000)
+	//			{
+	//				ARM_LiftMotorRefAngle = 0;
+	//			}
+				
+				
 				static uint32_t egg_mark = 0;
-				if(TIM8->CCR1 == 2500)//¾ÍÊÇÒ»¸öÑÓÊ±
+				if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_4) == 1)//¾ÍÊÇÒ»¸öÑÓÊ±
 				{
 					egg_mark = xTaskGetTickCount();
 				
 				}
-				TIM8->CCR1 = 1200;
-				if(xTaskGetTickCount() - egg_mark >500)
+				HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,GPIO_PIN_RESET);
+				if(xTaskGetTickCount() - egg_mark >400)
 				{
 				  ARM_LiftMotorRefAngle = 0;
 				}
@@ -241,7 +237,7 @@ void ArmPart_Get_Movement(void)
 				ARM_PINCH;			//¿ØÖÆÕâ¸öµÄµç´Å·§ºÍµ¯µ¯Ò©ÏäµÄµç´Å·§ÓÃÍ¬Ò»¸ö
 				Egg_Box_Held++;
 				
-				if(xTaskGetTickCount() - arm_time_mark > 400)
+				if(xTaskGetTickCount() - arm_time_mark > 500)
 				{
 					arm_move_i++;		
 				}
@@ -260,7 +256,12 @@ void ArmPart_Get_Movement(void)
 						}
 				}
 				else
-					arm_move_i++;
+				{
+					if(xTaskGetTickCount() - arm_time_mark > 200)
+						{
+							arm_move_i++;		
+						}
+					}
 			}break;
 			
 			
@@ -297,8 +298,12 @@ void ArmPart_Get_Movement(void)
 				{
 					ARM_LiftMotorRefAngle += LIFT_ANGLE_DELTA;
 				}
-
-				if(arm_average_angle >LIFT_ANGLE - 300)//¼õÒ»¸öÖµÊÇÎªÁËÌáÔç½øÈëÏÂÒ»¶¯×÷£¬¶øÕâÒ»¶¯×÷ÓÖÄÜ¼ÌÐø½øÐÐ
+				
+				if(Arm_OperateMode == Arm_Auto_Get_I_Egg)
+				{
+					ARM_LiftMotorRefAngle += LIFT_ANGLE_DELTA1;
+				}
+				if(arm_average_angle >ARM_LiftMotorRefAngle - 250)//¼õÒ»¸öÖµÊÇÎªÁËÌáÔç½øÈëÏÂÒ»¶¯×÷£¬¶øÕâÒ»¶¯×÷ÓÖÄÜ¼ÌÐø½øÐÐ
 				{
 					arm_move_i++;
 				}	
@@ -341,11 +346,11 @@ void ArmPart_Get_Movement(void)
 			}break;
 			case ARM_LEFT_CMD:
 			{
-				ARM_TransMotorRefAngle  = 0;//×î×ó¶ËÎª0Öµ£¬ÒÔºóÐ´Èëflash£¬»ò¿ª»ú×Ô¼ì
-				if(MoveArm_Motor_Measure.ecd_angle <2000)
-				{
-					arm_move_i++;
-				}	
+//				ARM_TransMotorRefAngle  = 0;//×î×ó¶ËÎª0Öµ£¬ÒÔºóÐ´Èëflash£¬»ò¿ª»ú×Ô¼ì
+//				if(MoveArm_Motor_Measure.ecd_angle <2000)
+//				{
+//					arm_move_i++;
+//				}	
 				
 			}break;
 			case ARM_MIDDLE_CMD:
@@ -359,12 +364,12 @@ void ArmPart_Get_Movement(void)
 			}break;
 			case ARM_RIGHT_CMD:
 			{
-				ARM_TransMotorRefAngle = MOVE_ANGLE_R;
-				if(MoveArm_Motor_Measure.ecd_angle > MOVE_ANGLE_R - 400)
-				{
-					arm_move_i++;
-				}	
-				
+//				ARM_TransMotorRefAngle = MOVE_ANGLE_R;
+//				if(MoveArm_Motor_Measure.ecd_angle > MOVE_ANGLE_R - 400)
+//				{
+//					arm_move_i++;
+//				}	
+//				
 			}break;
 			case ARM_ROTATE_I_CMD:
 			{
@@ -387,6 +392,25 @@ void ArmPart_Get_Movement(void)
 					ARM_RotateMotorRefAngle += ROTATE_ANGLE_DELTA;
 				}
 				
+
+					if(FlipArm_Motor_Measure.ecd_angle > ARM_RotateMotorRefAngle-100)
+					{
+						if(xTaskGetTickCount() - arm_time_mark > 600)
+						{
+							arm_move_i++;		
+						}
+					}	
+				
+	
+					
+			}break;
+			
+			case ARM_ROTATE_AWAY_CMD:
+			{						
+				ARM_RotateMotorRefAngle = ROTATE_ANGLE_AWAY;
+				
+		
+				
 //				if(Egg_Box_Held == 1)//ÕâÒ»²¿ÊÇÎªÁË½«µ¯Ò©ÏäË¦³öÈ¥//ÍêÈ«¿ÉÒÔÓÃÑÓÊ±Ð´
 //				{
 //					if(FlipArm_Motor_Measure.ecd_angle > ROTATE_ANGLE-500)//Ã»´ï³ÉÄ¿µÄ
@@ -396,9 +420,9 @@ void ArmPart_Get_Movement(void)
 //				}
 //				else 
 //				{
-					if(FlipArm_Motor_Measure.ecd_angle > ROTATE_ANGLE-50)
+					if(FlipArm_Motor_Measure.ecd_angle > ROTATE_ANGLE_AWAY-50)
 					{
-						if(xTaskGetTickCount() - arm_time_mark > 600)
+						if(xTaskGetTickCount() - arm_time_mark > 400)
 						{
 							arm_move_i++;		
 						}
@@ -408,6 +432,7 @@ void ArmPart_Get_Movement(void)
 	
 					
 			}break;
+			
 					case ARM_ROTATE_MAX_CMD:
 			{
 				ARM_RotateMotorRefAngle = ROTATE_ANGLE_MAX;
@@ -418,7 +443,7 @@ void ArmPart_Get_Movement(void)
 //				}
 				
 
-					if(FlipArm_Motor_Measure.ecd_angle > ROTATE_ANGLE-50)
+					if(FlipArm_Motor_Measure.ecd_angle > ROTATE_ANGLE_MAX-50)
 					{
 						if(xTaskGetTickCount() - arm_time_mark > 600)
 						{
@@ -427,15 +452,6 @@ void ArmPart_Get_Movement(void)
 					}	
 
 					
-			}break;
-			case ARM_ROTATE_H_CMD:
-			{
-				ARM_RotateMotorRefAngle = ROTATE_H_ANGLE;
-				
-				if(FlipArm_Motor_Measure.ecd_angle < ROTATE_H_ANGLE+100)
-				{
-					arm_move_i++;
-				}	
 			}break;
 			
 			case ARM_ROTATE_M_CMD:
@@ -469,12 +485,18 @@ void ArmPart_Get_Movement(void)
 			}break;
 			case ARM_DELAY_CMD:
 			{
+
 				//µ¥´¿µÄ¸øÑÓÊ±ÓÃµÄ,Ä¿Ç°ÊÇ¸øµ×ÅÌÓÃ
-				if(xTaskGetTickCount() - arm_time_mark > 700)//ÑÓÊ±3Ãë
+				if(xTaskGetTickCount() - arm_time_mark > 450)//
 				{
 					arm_move_i++;		
 				}
-			}
+				
+			}break;
+			case ARM_WAIT_CM_CMD:
+			{
+				//µÈ´ýµ×ÅÌ±àÂëÆ÷
+			}break;
 			default:
 			{			
 			}
@@ -506,7 +528,7 @@ float pos_kp = 10;
 float arm_output_c =  1;
 
 float rotate_pos_kp[5] = {4,8,5,5,10};
-float rotate_speed_kp[5] = {3,30,20,10,5};
+float rotate_speed_kp[5] = {2.5,30,20,10,5};
 void Arm_Motor_Get_PID_Para(void)//ÒÔºó±äÁ¿ÃüÃûÒÔÆäÓÃÍ¾Î»ÖÃµÈÃüÃû£¬²»ÒªÒÔËûÊÇÊ²Ã´¶«Î÷ÃüÃû
 {
 	//ÒÔÏÂÊÇÃ»ÓÐÌØÊâ¶¯×÷Ê±µÄPID²ÎÊý
@@ -538,6 +560,14 @@ void Arm_Motor_Get_PID_Para(void)//ÒÔºó±äÁ¿ÃüÃûÒÔÆäÓÃÍ¾Î»ÖÃµÈÃüÃû£¬²»ÒªÒÔËûÊÇÊ²Ã
 			arm_output_c = 1;
 		
 		}
+		if(Arm_Move[arm_move_i] == ARM_ROTATE_AWAY_CMD)//×¥È¡ºó·­»ØÊ±£¬ËÙ¶È±äÂý£¬Á¦Á¿Òª´ó
+		{
+			
+			AMRotatePID.kp = 5;
+			arm_output_c = 1;
+			AMRotatePositionPID.kp = 8;
+		}
+		
 		if(Arm_Move[arm_move_i] == ARM_ROTATE_H_CMD&&Egg_Box_Held == 1)
 		{
 			AMRotatePID.kp = 5;//
@@ -589,7 +619,13 @@ void Arm_Motor_Get_PID_Para(void)//ÒÔºó±äÁ¿ÃüÃûÒÔÆäÓÃÍ¾Î»ÖÃµÈÃüÃû£¬²»ÒªÒÔËûÊÇÊ²Ã
 			arm_output_c = 9;
 			
 		}
-		
+		if(Arm_Move[arm_move_i] == ARM_ROTATE_AWAY_CMD)//×¥È¡ºó·­»ØÊ±£¬ËÙ¶È±äÂý£¬Á¦Á¿Òª´ó
+		{
+			
+			AMRotatePID.kp = 5;
+			arm_output_c = 1;
+			AMRotatePositionPID.kp = 8;
+		}
 		if(Arm_Move[arm_move_i] == ARM_ROTATE_O_CMD &&Egg_Box_Held == 0)//³öÈ¥¼ÐÊ±ÒªÂý
 		{
 			AMRotatePID.kp = rotate_speed_kp[0];
@@ -603,6 +639,14 @@ void Arm_Motor_Get_PID_Para(void)//ÒÔºó±äÁ¿ÃüÃûÒÔÆäÓÃÍ¾Î»ÖÃµÈÃüÃû£¬²»ÒªÒÔËûÊÇÊ²Ã
 			AMRotatePositionPID.kp = 15;
 		}
 	
+	
+	}
+	
+	if((Arm_Move[arm_move_i] == ARM_ROTATE_O_CMD || Arm_Move[arm_move_i] == ARM_ROTATE_MAX_CMD) &&Egg_Box_Held == 0)
+	{
+		AMRotatePID.kp = rotate_speed_kp[0];
+		AMRotatePositionPID.kp = rotate_pos_kp[0];//½Ç¶È´óÓÚÄ¿±êÖµÊ±,ÓÐ¿ÉÄÜÊÇkp¹ý´ó³¬µ÷
+		arm_output_c = 1;
 	
 	}
 	
@@ -620,7 +664,7 @@ void Arm_Cali_Output(void)
 	if(Arm_OperateMode == Arm_KeyMouseMode)
 	{
 		PID_Task(&LCM5PositionPID,-ARM_LiftMotorRefAngle,LiftChain_Motor5_Measure.ecd_angle);//
-		PID_Task(&LCM5SpeedPID,LCM5PositionPID.output,LiftChain_Motor5_Measure.speed_rpm/3);//
+		PID_Task(&LCM5SpeedPID,LCM5PositionPID.output,LiftChain_Motor5_Measure.speed_rpm/3);//ÆäÊµÕâÀï¶¼Ó¦µ±³ýÒÔ¼õËÙ±ÈµÄ,ÏÖÔÚÕâÑù²»Ì«ºÃµ÷PID
 
 		PID_Task(&LCM6PositionPID, ARM_LiftMotorRefAngle,LiftChain_Motor6_Measure.ecd_angle);//
 		PID_Task(&LCM6SpeedPID,LCM6PositionPID.output,LiftChain_Motor6_Measure.speed_rpm/3);//

@@ -86,7 +86,7 @@ void 	CM_Calc_Output(void)
 		if(CM1SpeedPID.output>-700 && CM1SpeedPID.output<700 ) CM1SpeedPID.output=0;
 		if(CM2SpeedPID.output>-700 && CM2SpeedPID.output<700 ) CM2SpeedPID.output=0;
 		if(CM3SpeedPID.output>-700 && CM3SpeedPID.output<700 ) CM3SpeedPID.output=0;
-		if(CM4SpeedPID.output>-1500 && CM4SpeedPID.output<1500 ) CM4SpeedPID.output=0;
+		if(CM4SpeedPID.output>-700 && CM4SpeedPID.output<700 ) CM4SpeedPID.output=0;
 		
 		if(chassis_stopflag&&key_w == 0&&Remote_CheckJumpKey(KEY_A) == 0&&Remote_CheckJumpKey(KEY_S) == 0 &&Remote_CheckJumpKey(KEY_D) == 0&&abs(RC_CtrlData.mouse.x<10))
 		{//这里还需要延时一段时间
@@ -99,7 +99,7 @@ void 	CM_Calc_Output(void)
 		if(CM1SpeedPID.output>-700 && CM1SpeedPID.output<700 ) CM1SpeedPID.output=0;
 		if(CM2SpeedPID.output>-700 && CM2SpeedPID.output<700 ) CM2SpeedPID.output=0;
 		if(CM3SpeedPID.output>-700 && CM3SpeedPID.output<700 ) CM3SpeedPID.output=0;
-		if(CM4SpeedPID.output>-1500 && CM4SpeedPID.output<1500 ) CM4SpeedPID.output=0;
+		if(CM4SpeedPID.output>-700 && CM4SpeedPID.output<700 ) CM4SpeedPID.output=0;
 	
 	}
 			key_w_last = key_w;
@@ -217,7 +217,7 @@ void Key2Speed(int16_t FB, int16_t LR)
 	
 	
 }
-
+uint32_t cccddd = 0;
 extern uint32_t mod3;
 extern AutoMovement_e AutoMovement;
 #include "Data_MiniPC.h"
@@ -279,7 +279,7 @@ void CM_Get_SpeedRef(void)
 		}
 		ChassisData.ChassisSpeedRef.Y		= Y_temp * CM_SPEED_C;
 		ChassisData.ChassisSpeedRef.X   	= X_temp * CM_SPEED_C; 
-		ChassisData.ChassisSpeedRef.Omega  = RC_CtrlData.rc.ch2/2;//* CM_OMEGA_C+abs(Y_temp)/2;
+		ChassisData.ChassisSpeedRef.Omega  = RC_CtrlData.rc.ch2/2*CM_OMEGA_C;//* CM_OMEGA_C+abs(Y_temp)/2;
 
 
 	}
@@ -335,15 +335,16 @@ void CM_Get_SpeedRef(void)
 		{
 			ChassisData.ChassisSpeedRef.Y = 0;
 		}//若要取三个,在取完第一个后记录编码器的
-		if(Arm_Move[arm_move_i] == ARM_DELAY_CMD&&(Arm_OperateMode == Arm_Auto_Get_Eggs))//新加未试
+		if(Arm_Move[arm_move_i] == ARM_WAIT_CM_CMD&&(Arm_OperateMode == Arm_Auto_Get_Eggs))//新加未试
 		{
 			if(abs((abs(Chassis_Motor1_Measure.ecd_angle) + abs(Chassis_Motor2_Measure.ecd_angle)+\
-			abs(Chassis_Motor3_Measure.ecd_angle)+abs(Chassis_Motor4_Measure.ecd_angle))/4-CM_AngleMark) < 3383)
+			abs(Chassis_Motor3_Measure.ecd_angle)+abs(Chassis_Motor4_Measure.ecd_angle))/4-CM_AngleMark) < 4885)
 			{
-				ChassisData.ChassisSpeedRef.X = 160;
+				ChassisData.ChassisSpeedRef.X = 100;
 			}
 			else
 			{
+				arm_move_i++;		
 				ChassisData.ChassisSpeedRef.X = 0;
 				CM_AngleMark =(abs(Chassis_Motor1_Measure.ecd_angle) + abs(Chassis_Motor2_Measure.ecd_angle) +abs(Chassis_Motor3_Measure.ecd_angle)+abs(Chassis_Motor4_Measure.ecd_angle))/4;
 
@@ -371,10 +372,10 @@ void CM_Get_SpeedRef(void)
 	{
 //		//底盘和导轮一起往前走
 		
-		if(InfraredState_back&& angle_average >11000)//后面红外检测到并且抬升机构一部分在下面时
+		if(InfraredState_back&& angle_average >10800)//后面红外检测到并且抬升机构一部分在下面时
 		{
 			
-			angle_save = pitch_angle;//保存上岛时陀螺仪的角度，下岛时自动归回
+//			angle_save = pitch_angle;//保存上岛时陀螺仪的角度，下岛时自动归回
 			cm_timetick  = xTaskGetTickCount();
 		}
 
@@ -385,7 +386,7 @@ void CM_Get_SpeedRef(void)
 		}
 		
 		time_X = xTaskGetTickCount() - cm_timetick;
-		if(time_X > 3000&&cm_timetick!=0)//这里加是红外是防止时间刚开始就加，大于4000
+		if(time_X > 2800&&cm_timetick!=0)//这里加是红外是防止时间刚开始就加，大于4000
 		{
 			flag_gcm = 0;
 			lift_flag_again = 1;
@@ -397,13 +398,13 @@ void CM_Get_SpeedRef(void)
 	{
 		
 			ChassisData.ChassisSpeedRef.Omega = -PID_Task(&CMRotatePID, angle_save, pitch_angle);//这个是到时候得注意的
-			ChassisData.ChassisSpeedRef.Y = -200;//
+			ChassisData.ChassisSpeedRef.Y = -150;//
 			ChassisData.ChassisSpeedRef.X = 0;
 
 			
 			if(flag_gcm == -1)
 			{
-				ChassisData.ChassisSpeedRef.Y = -100;//
+				ChassisData.ChassisSpeedRef.Y = -80;//
 			}
 			else if(flag_gcm == 0)
 			{
@@ -420,7 +421,6 @@ void CM_Get_SpeedRef(void)
 		ChassisData.ChassisAngle = 0;
 	
 	}
-
 	CalculateWheelSpeed(ChassisData.ChassisSpeedRef.X,\
 										ChassisData.ChassisSpeedRef.Y,\
 										ChassisData.ChassisSpeedRef.Omega,\

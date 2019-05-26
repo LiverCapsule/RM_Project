@@ -4,6 +4,7 @@
 #include "CanBusTask.h"
 #include "Driver_Remote.h"
 #include "Driver_Sensor.h"
+#include "imu.h"
 
 LiftMechanismMode_e LiftMechanismMode;
 
@@ -17,13 +18,11 @@ extern PID_Regulator_t LCM4PositionPID;
 int16_t LiftAngleRef = 0;
 extern AutoMovement_e AutoMovement;
 float LM_SPEED_C = 1;
+extern float angle_save ;
 
 void BeltMotorSpeedSet(int16_t speed)
 {
-//	BeltMotorSpeedRef[0] = speed;
-//	BeltMotorSpeedRef[1] = -speed;
-//	BeltMotorSpeedRef[2] = speed;
-//	BeltMotorSpeedRef[3] = -speed;
+
 	
 	BeltMotorSpeedRef[0] = BeltMotorSpeedRef[1] = speed;//只有两个斜对角电机时
 	
@@ -83,11 +82,11 @@ void LM_Get_SpeedRef(void)
 		}break;
 		case Lift_KeyMouseMode:
 		{
-			if(Remote_CheckJumpKey(KEY_W) == 1 && RC_CtrlData.mouse.press_l == 1&&Remote_CheckJumpKey(KEY_G)==0)
+			if(Remote_CheckJumpKey(KEY_W) == 1 && RC_CtrlData.mouse.press_l == 1&&Remote_CheckJumpKey(KEY_R)==0)
 			{
 				BeltMotorSpeedSet(-350);
 			}
-			else if(Remote_CheckJumpKey(KEY_S) == 1 && RC_CtrlData.mouse.press_l == 1&&Remote_CheckJumpKey(KEY_G)==0)
+			else if(Remote_CheckJumpKey(KEY_S) == 1 && RC_CtrlData.mouse.press_l == 1&&Remote_CheckJumpKey(KEY_R)==0)
 			{
 				BeltMotorSpeedSet(350);
 			}
@@ -106,11 +105,12 @@ void LM_Get_SpeedRef(void)
 			angle_average = abs(LiftChain_Motor1_Measure.ecd_angle);
 			if(Remote_CheckJumpKey(KEY_Z)||(lift_flag_again))//这一句有点跳跃，而且可能有问题
 			{
-				LiftAngleRef =  13000;
+				LiftAngleRef =  13300;
 				temp = angle_average;
+				angle_save = pitch_angle;
 			}
 			
-			if(angle_average > 11000 || angle_average < 1000)//大于14000,底盘就前进
+			if(angle_average > 10800 || angle_average < 1200)//大于14000,底盘就前进
 			{
 				flag_gcm = 1;//这个会在底盘前进一段时间后清零
 			}
@@ -125,8 +125,8 @@ void LM_Get_SpeedRef(void)
 				if(InfraredState_back == 0 && angle_average >11000)
 				{
 					lift_flag_again = 0;
-					LiftAngleRef =  -1000;//可能这里有问题
-//					BeltMotorSpeedSet(0);
+					LiftAngleRef =  -500;//可能这里有问题
+
 				}
 			}
 	
@@ -144,7 +144,7 @@ void LM_Get_SpeedRef(void)
 					LiftAngleRef =  12000;
 				}
 				
-				if(angle_average >10000||angle_average < 2200)//11200 200
+				if(angle_average >10000||angle_average < 1200)//11200 200
 				{
 					flag_gcm = -1;
 				}
@@ -198,8 +198,8 @@ void LM_Calc_Output(void)
 		
 		if(-(-LiftAngleRef/19 - LiftChain_Motor1_Measure.ecd_angle/19)>2000/19)
 		{
-			PID_Task(&LCM2SpeedPID,-350,LiftChain_Motor2_Measure.speed_rpm/10.0);
-			PID_Task(&LCM1SpeedPID,-350,LiftChain_Motor1_Measure.speed_rpm/10.0);
+			PID_Task(&LCM2SpeedPID,-500,LiftChain_Motor2_Measure.speed_rpm/10.0);
+			PID_Task(&LCM1SpeedPID,-500,LiftChain_Motor1_Measure.speed_rpm/10.0);
 			PID_Task(&LCM3SpeedPID,BeltMotorSpeedRef[2],LiftChain_Motor3_Measure.speed_rpm/10.0);
 			PID_Task(&LCM4SpeedPID,BeltMotorSpeedRef[3],LiftChain_Motor4_Measure.speed_rpm/10.0);
 
@@ -211,8 +211,8 @@ void LM_Calc_Output(void)
 		
 		}else if(-LiftAngleRef/19 - LiftChain_Motor1_Measure.ecd_angle/19 > 2000/19)
 		{
-			PID_Task(&LCM2SpeedPID,350,LiftChain_Motor2_Measure.speed_rpm/10.0);
-			PID_Task(&LCM1SpeedPID,350,LiftChain_Motor1_Measure.speed_rpm/10.0);
+			PID_Task(&LCM2SpeedPID,500,LiftChain_Motor2_Measure.speed_rpm/10.0);
+			PID_Task(&LCM1SpeedPID,500,LiftChain_Motor1_Measure.speed_rpm/10.0);
 			PID_Task(&LCM3SpeedPID,BeltMotorSpeedRef[2],LiftChain_Motor3_Measure.speed_rpm/10.0);
 			PID_Task(&LCM4SpeedPID,BeltMotorSpeedRef[3],LiftChain_Motor4_Measure.speed_rpm/10.0);
 
